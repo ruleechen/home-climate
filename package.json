@@ -1,0 +1,22 @@
+{
+  "name": "home-air",
+  "version": "0.0.1",
+  "main": "",
+  "scripts": {
+    "build": "gulp build"
+  },
+  "author": {
+    "name": "Rulee Chen",
+    "email": "rulee@live.cn"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ruleechen/home-switch.git"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "del": "^6.0.0",
+    "fs-extra": "^10.0.0",
+    "gulp": "^4.0.2"
+  }
+}

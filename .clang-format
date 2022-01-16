@@ -1,0 +1,13 @@
+﻿# https://zed0.co.uk/clang-format-configurator/
+
+---
+BasedOnStyle: Google
+ColumnLimit: '200'
+FixNamespaceComments: 'true'
+IncludeBlocks: Merge
+NamespaceIndentation: All
+SortIncludes: 'false'
+SortUsingDeclarations: 'false'
+SpacesBeforeTrailingComments: '1'
+
+...
