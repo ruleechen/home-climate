@@ -26,17 +26,20 @@ homekit_service_t informationService = HOMEKIT_SERVICE_(
   },
 );
 
-// format: float; min 0, max 100, step 0.1, unit celsius
-homekit_characteristic_t temperatureState = HOMEKIT_CHARACTERISTIC_(CURRENT_TEMPERATURE, 0);
-// format: float; min 0, max 100, step 1
-homekit_characteristic_t humidityState = HOMEKIT_CHARACTERISTIC_(CURRENT_RELATIVE_HUMIDITY, 0);
+// format: uint8; HAP section 9.118; 0 = Unknown, 1 = Excellent, 2 = Good, 3 = Fair, 4 = Inferior, 5 = Poor
+homekit_characteristic_t airQualityState = HOMEKIT_CHARACTERISTIC_(AIR_QUALITY, 0);
+// format: float; HAP section 9.126; min 0, max 1000, step 1
+homekit_characteristic_t vocDensityState = HOMEKIT_CHARACTERISTIC_(VOC_DENSITY, 0);
+// format: bool; HAP section 9.96; true or false
+homekit_characteristic_t activeState = HOMEKIT_CHARACTERISTIC_(STATUS_ACTIVE, true);
 
 homekit_service_t stateService = HOMEKIT_SERVICE_(
-  GARAGE_DOOR_OPENER,
+  AIR_QUALITY_SENSOR,
   .primary = true,
   .characteristics = (homekit_characteristic_t*[]) {
-    &temperatureState,
-    &humidityState,
+    &airQualityState,
+    &vocDensityState,
+    &activeState,
     NULL,
   },
 );
