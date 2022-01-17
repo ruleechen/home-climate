@@ -16,8 +16,6 @@
 using namespace Victor;
 using namespace Victor::Components;
 
-extern "C" homekit_characteristic_t temperatureState;
-extern "C" homekit_characteristic_t humidityState;
 extern "C" homekit_characteristic_t airQualityState;
 extern "C" homekit_characteristic_t vocDensityState;
 extern "C" homekit_characteristic_t accessoryName;
@@ -60,13 +58,7 @@ void measure(bool notify) {
   // aht
   sensors_event_t humidity, temp;
   if (aht.getEvent(&humidity, &temp)) {
-    temperatureState.value.float_value = temp.temperature;
-    humidityState.value.float_value = humidity.relative_humidity;
     sgp.setHumidity(getAbsoluteHumidity(temp.temperature, humidity.relative_humidity));
-    if (notify) {
-      homekit_characteristic_notify(&temperatureState, temperatureState.value);
-      homekit_characteristic_notify(&humidityState, humidityState.value);
-    }
     console.log()
       .bracket(F("aht10"))
       .section(F("temperature"), String(temp.temperature))
@@ -85,12 +77,6 @@ void measure(bool notify) {
       .section(F("TVOC"), String(sgp.TVOC))
       .section(F("eCO2"), String(sgp.eCO2));
   }
-  // if (sgp.IAQmeasureRaw()) {
-  //   console.log()
-  //     .bracket(F("sgp30"))
-  //     .section(F("RawH2"), String(sgp.rawH2))
-  //     .section(F("RawEthanol"), String(sgp.rawEthanol));
-  // }
 }
 
 void setup(void) {
@@ -109,8 +95,6 @@ void setup(void) {
   webPortal.onRequestEnd = []() { builtinLed.toggle(); };
   webPortal.onServiceGet = [](std::vector<KeyValueModel>& items) {
     items.push_back({ .key = F("Service"),     .value = VICTOR_ACCESSORY_SERVICE_NAME });
-    items.push_back({ .key = F("Temperature"), .value = String(temperatureState.value.float_value) + F("C") });
-    items.push_back({ .key = F("Humidity"),    .value = String(humidityState.value.float_value) + F("%") });
     items.push_back({ .key = F("Air Quality"), .value = parseStateName(airQualityState.value.uint8_value) });
     items.push_back({ .key = F("VOC Density"), .value = String(vocDensityState.value.float_value) });
     items.push_back({ .key = F("Paired"),      .value = parseYesNo(homekit_is_paired()) });
