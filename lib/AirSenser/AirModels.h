@@ -7,11 +7,11 @@ namespace Victor {
 
   enum AirQuality {
     AirQualityUnknown = 0,
-    AirQualityExcellent = 1, // 0 ~ 99
-    AirQualityGood = 2,      // 100 ~ 199
-    AirQualityFair = 3,      // 200 ~ 399
-    AirQualityInferior = 4,  // 400 ~ 599
-    AirQualityPoor = 5,      // 600 ~ 1000
+    AirQualityExcellent = 1,
+    AirQualityGood = 2,
+    AirQualityFair = 3,
+    AirQualityInferior = 4,
+    AirQualityPoor = 5,
   };
 
   struct AirSetting {

@@ -38,12 +38,29 @@ String parseStateName(uint8_t state) {
   );
 }
 
-AirQuality parseAirQuality(float value) {
-  return AirQualityGood;
-}
-
 String parseYesNo(bool state) {
   return state == true ? F("Yes") : F("No");
+}
+
+AirQuality parseAirQuality(float value) {
+  // 0 ~ 99
+  if (value < 99) {
+    return AirQualityExcellent;
+  }
+  // 100 ~ 199
+  if (value < 199) {
+    return AirQualityGood;
+  }
+  // 200 ~ 399
+  if (value < 399) {
+    return AirQualityFair;
+  }
+  // 400 ~ 599
+  if (value < 599) {
+    return AirQualityInferior;
+  }
+  // 600 ~ 1000
+  return AirQualityPoor;
 }
 
 uint32_t getAbsoluteHumidity(float temperature, float humidity) {
