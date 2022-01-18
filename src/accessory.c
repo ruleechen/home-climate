@@ -11,10 +11,10 @@ homekit_characteristic_t accessoryModel        = HOMEKIT_CHARACTERISTIC_(MODEL, 
 homekit_characteristic_t accessoryVersion      = HOMEKIT_CHARACTERISTIC_(FIRMWARE_REVISION, VICTOR_FIRMWARE_VERSION);
 homekit_characteristic_t accessoryIdentify     = HOMEKIT_CHARACTERISTIC_(IDENTIFY, onAccessoryIdentify);
 homekit_characteristic_t accessoryName         = HOMEKIT_CHARACTERISTIC_(NAME, VICTOR_ACCESSORY_SERVICE_NAME); // change on setup
-
+// info service
 homekit_service_t informationService = HOMEKIT_SERVICE_(
   ACCESSORY_INFORMATION,
-  .primary = false,
+  .primary = true,
   .characteristics = (homekit_characteristic_t*[]) {
     &accessoryManufacturer,
     &accessorySerialNumber,
@@ -26,20 +26,80 @@ homekit_service_t informationService = HOMEKIT_SERVICE_(
   },
 );
 
-// format: uint8; HAP section 9.118; 0 = Unknown, 1 = Excellent, 2 = Good, 3 = Fair, 4 = Inferior, 5 = Poor
-homekit_characteristic_t airQualityState = HOMEKIT_CHARACTERISTIC_(AIR_QUALITY, 0);
+// format: float; min 0, max 100, step 0.1, unit celsius
+homekit_characteristic_t temperatureState = HOMEKIT_CHARACTERISTIC_(CURRENT_TEMPERATURE, 0);
+// format: bool; HAP section 9.96; true or false
+homekit_characteristic_t temperatureActiveState = HOMEKIT_CHARACTERISTIC_(STATUS_ACTIVE, true);
+// service
+homekit_service_t temperatureService = HOMEKIT_SERVICE_(
+  TEMPERATURE_SENSOR,
+  .primary = true,
+  .characteristics = (homekit_characteristic_t*[]) {
+    &temperatureState,
+    &temperatureActiveState,
+    NULL,
+  },
+);
+// info service
+homekit_service_t temperatureInformationService = HOMEKIT_SERVICE_(
+  ACCESSORY_INFORMATION,
+  .characteristics = (homekit_characteristic_t*[]) {
+    HOMEKIT_CHARACTERISTIC(NAME, "Victor-Temperature"),
+    &accessoryIdentify,
+    NULL,
+  },
+);
+
+// format: float; min 0, max 100, step 1
+homekit_characteristic_t humidityState = HOMEKIT_CHARACTERISTIC_(CURRENT_RELATIVE_HUMIDITY, 0);
+// format: bool; HAP section 9.96; true or false
+homekit_characteristic_t humidityActiveState = HOMEKIT_CHARACTERISTIC_(STATUS_ACTIVE, true);
+// service
+homekit_service_t humidityService = HOMEKIT_SERVICE_(
+  HUMIDITY_SENSOR,
+  .primary = true,
+  .characteristics = (homekit_characteristic_t*[]) {
+    &humidityState,
+    &humidityActiveState,
+    NULL,
+  },
+);
+// info service
+homekit_service_t humidityInformationService = HOMEKIT_SERVICE_(
+  ACCESSORY_INFORMATION,
+  .characteristics = (homekit_characteristic_t*[]) {
+    HOMEKIT_CHARACTERISTIC(NAME, "Victor-Humidity"),
+    &accessoryIdentify,
+    NULL,
+  },
+);
+
+// format: float; HAP section 9.16; min 0, max 100000
+homekit_characteristic_t carbonDioxideState = HOMEKIT_CHARACTERISTIC_(CARBON_DIOXIDE_LEVEL, 0);
 // format: float; HAP section 9.126; min 0, max 1000, step 1
 homekit_characteristic_t vocDensityState = HOMEKIT_CHARACTERISTIC_(VOC_DENSITY, 0);
+// format: uint8; HAP section 9.118; 0 = Unknown, 1 = Excellent, 2 = Good, 3 = Fair, 4 = Inferior, 5 = Poor
+homekit_characteristic_t airQualityState = HOMEKIT_CHARACTERISTIC_(AIR_QUALITY, 0);
 // format: bool; HAP section 9.96; true or false
-homekit_characteristic_t activeState = HOMEKIT_CHARACTERISTIC_(STATUS_ACTIVE, true);
-
-homekit_service_t stateService = HOMEKIT_SERVICE_(
+homekit_characteristic_t airQualityActiveState = HOMEKIT_CHARACTERISTIC_(STATUS_ACTIVE, true);
+// service
+homekit_service_t airQualityService = HOMEKIT_SERVICE_(
   AIR_QUALITY_SENSOR,
   .primary = true,
   .characteristics = (homekit_characteristic_t*[]) {
-    &airQualityState,
+    &carbonDioxideState,
     &vocDensityState,
-    &activeState,
+    &airQualityState,
+    &airQualityActiveState,
+    NULL,
+  },
+);
+// info service
+homekit_service_t airQualityInformationService = HOMEKIT_SERVICE_(
+  ACCESSORY_INFORMATION,
+  .characteristics = (homekit_characteristic_t*[]) {
+    HOMEKIT_CHARACTERISTIC(NAME, "Victor-Air"),
+    &accessoryIdentify,
     NULL,
   },
 );
@@ -47,10 +107,36 @@ homekit_service_t stateService = HOMEKIT_SERVICE_(
 homekit_accessory_t* accessories[] = {
   HOMEKIT_ACCESSORY(
     .id = 1,
-    .category = homekit_accessory_category_sensor,
+    .category = homekit_accessory_category_bridge,
     .services = (homekit_service_t*[]) {
       &informationService,
-      &stateService,
+      NULL,
+    },
+  ),
+  HOMEKIT_ACCESSORY(
+    .id = 2,
+    .category = homekit_accessory_category_sensor,
+    .services = (homekit_service_t*[]) {
+      &temperatureInformationService,
+      &temperatureService,
+      NULL,
+    },
+  ),
+  HOMEKIT_ACCESSORY(
+    .id = 3,
+    .category = homekit_accessory_category_sensor,
+    .services = (homekit_service_t*[]) {
+      &humidityInformationService,
+      &humidityService,
+      NULL,
+    },
+  ),
+  HOMEKIT_ACCESSORY(
+    .id = 4,
+    .category = homekit_accessory_category_sensor,
+    .services = (homekit_service_t*[]) {
+      &airQualityInformationService,
+      &airQualityService,
       NULL,
     },
   ),

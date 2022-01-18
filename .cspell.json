@@ -16,6 +16,8 @@
     "rssi",
     "mDNS",
     "mithril",
-    "oninit"
+    "oninit",
+    "IAQ",
+    "TVOC"
   ]
 }

@@ -16,8 +16,18 @@
 using namespace Victor;
 using namespace Victor::Components;
 
-extern "C" homekit_characteristic_t airQualityState;
+// temperature
+extern "C" homekit_characteristic_t temperatureState;
+extern "C" homekit_characteristic_t temperatureActiveState;
+// humidity
+extern "C" homekit_characteristic_t humidityState;
+extern "C" homekit_characteristic_t humidityActiveState;
+// air quality
+extern "C" homekit_characteristic_t carbonDioxideState;
 extern "C" homekit_characteristic_t vocDensityState;
+extern "C" homekit_characteristic_t airQualityState;
+extern "C" homekit_characteristic_t airQualityActiveState;
+// others
 extern "C" homekit_characteristic_t accessoryName;
 extern "C" homekit_server_config_t serverConfig;
 
@@ -74,20 +84,66 @@ void measure(bool notify) {
   builtinLed.flash();
   // aht
   sensors_event_t humidity, temp;
-  if (aht.getEvent(&humidity, &temp)) {
-    sgp.setHumidity(getAbsoluteHumidity(temp.temperature, humidity.relative_humidity));
+  const auto ahtOk = aht.getEvent(&humidity, &temp);
+  if (temperatureActiveState.value.bool_value != ahtOk) {
+    temperatureActiveState.value.bool_value = ahtOk;
+    if (notify) {
+      homekit_characteristic_notify(&temperatureActiveState, temperatureActiveState.value);
+    }
+  }
+  if (humidityActiveState.value.bool_value != ahtOk) {
+    humidityActiveState.value.bool_value = ahtOk;
+    if (notify) {
+      homekit_characteristic_notify(&humidityActiveState, humidityActiveState.value);
+    }
+  }
+  if (ahtOk) {
+    if (temperatureState.value.float_value != temp.temperature) {
+      temperatureState.value.float_value = temp.temperature;
+      if (notify) {
+        homekit_characteristic_notify(&temperatureState, temperatureState.value);
+      }
+    }
+    if (humidityState.value.float_value != humidity.relative_humidity) {
+      humidityState.value.float_value = humidity.relative_humidity;
+      if (notify) {
+        homekit_characteristic_notify(&humidityState, humidityState.value);
+      }
+    }
     console.log()
       .bracket(F("aht10"))
       .section(F("temperature"), String(temp.temperature))
       .section(F("humidity"), String(humidity.relative_humidity));
+    // write to sgp
+    sgp.setHumidity(getAbsoluteHumidity(temp.temperature, humidity.relative_humidity));
   }
   // sgp
-  if (sgp.IAQmeasure()) {
-    vocDensityState.value.float_value = sgp.TVOC;
-    airQualityState.value.uint8_value = parseAirQuality(sgp.TVOC);
+  const auto sgpOk = sgp.IAQmeasure();
+  if (airQualityActiveState.value.bool_value != sgpOk) {
+    airQualityActiveState.value.bool_value = sgpOk;
     if (notify) {
-      homekit_characteristic_notify(&vocDensityState, vocDensityState.value);
-      homekit_characteristic_notify(&airQualityState, airQualityState.value);
+      homekit_characteristic_notify(&airQualityActiveState, airQualityActiveState.value);
+    }
+  }
+  if (sgpOk) {
+    if (carbonDioxideState.value.float_value != sgp.eCO2) {
+      carbonDioxideState.value.float_value = sgp.eCO2;
+      if (notify) {
+        homekit_characteristic_notify(&carbonDioxideState, carbonDioxideState.value);
+      }
+    }
+    if (vocDensityState.value.float_value != sgp.TVOC) {
+      vocDensityState.value.float_value = sgp.TVOC;
+      if (notify) {
+        homekit_characteristic_notify(&vocDensityState, vocDensityState.value);
+      }
+    }
+    const auto quality = parseAirQuality(sgp.TVOC);
+    if (airQualityState.value.uint8_value != quality) {
+      airQualityState.value.uint8_value = quality;
+      if (notify) {
+        homekit_characteristic_notify(&airQualityState, airQualityState.value);
+      }
     }
     console.log()
       .bracket(F("sgp30"))
@@ -112,8 +168,11 @@ void setup(void) {
   webPortal.onRequestEnd = []() { builtinLed.toggle(); };
   webPortal.onServiceGet = [](std::vector<KeyValueModel>& items) {
     items.push_back({ .key = F("Service"),     .value = VICTOR_ACCESSORY_SERVICE_NAME });
-    items.push_back({ .key = F("Air Quality"), .value = parseStateName(airQualityState.value.uint8_value) });
+    items.push_back({ .key = F("Temperature"), .value = String(temperatureState.value.float_value) + F("C") });
+    items.push_back({ .key = F("Humidity"),    .value = String(humidityState.value.float_value) + F("%") });
+    items.push_back({ .key = F("CO2 Level"),   .value = String(carbonDioxideState.value.float_value) });
     items.push_back({ .key = F("VOC Density"), .value = String(vocDensityState.value.float_value) });
+    items.push_back({ .key = F("Air Quality"), .value = parseStateName(airQualityState.value.uint8_value) });
     items.push_back({ .key = F("Paired"),      .value = parseYesNo(homekit_is_paired()) });
     items.push_back({ .key = F("Clients"),     .value = String(arduino_homekit_connected_clients_count()) });
   };
