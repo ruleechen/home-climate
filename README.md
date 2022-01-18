@@ -1,5 +1,5 @@
-# home-air
-Apple HomeKit air quality sensor firmware
+# home-env
+Apple HomeKit environment sensor firmware
 
 ### Development Tools
 - [Visual Studio Code](https://code.visualstudio.com/)
