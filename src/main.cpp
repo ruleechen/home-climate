@@ -1,6 +1,6 @@
 #include <Arduino.h>
 #include <Wire.h>
-#include <Adafruit_AHTX0.h>
+#include <AHT10.h>
 #include <SGP30.h>
 #include <arduino_homekit_server.h>
 
@@ -31,7 +31,7 @@ extern "C" homekit_characteristic_t airQualityActiveState;
 extern "C" homekit_characteristic_t accessoryName;
 extern "C" homekit_server_config_t serverConfig;
 
-Adafruit_AHTX0 aht;
+AHT10 aht;
 SGP30 sgp;
 VictorWeb webPortal(80);
 String hostName;
@@ -76,8 +76,7 @@ AirQuality parseAirQuality(float value) {
 void measure(bool notify) {
   builtinLed.flash();
   // aht
-  sensors_event_t humidity, temp;
-  const auto ahtOk = aht.getEvent(&humidity, &temp);
+  const auto ahtOk = aht.readRawData() != AHT10_ERROR;
   if (temperatureActiveState.value.bool_value != ahtOk) {
     temperatureActiveState.value.bool_value = ahtOk;
     if (notify) {
@@ -91,24 +90,26 @@ void measure(bool notify) {
     }
   }
   if (ahtOk) {
-    if (temperatureState.value.float_value != temp.temperature) {
-      temperatureState.value.float_value = temp.temperature;
+    const auto temperature = aht.readTemperature(AHT10_USE_READ_DATA);
+    if (temperatureState.value.float_value != temperature) {
+      temperatureState.value.float_value = temperature;
       if (notify) {
         homekit_characteristic_notify(&temperatureState, temperatureState.value);
       }
     }
-    if (humidityState.value.float_value != humidity.relative_humidity) {
-      humidityState.value.float_value = humidity.relative_humidity;
+    const auto humidity = aht.readHumidity(AHT10_USE_READ_DATA);
+    if (humidityState.value.float_value != humidity) {
+      humidityState.value.float_value = humidity;
       if (notify) {
         homekit_characteristic_notify(&humidityState, humidityState.value);
       }
     }
     console.log()
       .bracket(F("aht10"))
-      .section(F("temperature"), String(temp.temperature))
-      .section(F("humidity"), String(humidity.relative_humidity));
+      .section(F("temperature"), String(temperature))
+      .section(F("humidity"), String(humidity));
     // write to sgp
-    sgp.setRelHumidity(temp.temperature, humidity.relative_humidity);
+    sgp.setRelHumidity(temperature, humidity);
   }
   // sgp
   const auto sgpOk = sgp.measure(true);;
