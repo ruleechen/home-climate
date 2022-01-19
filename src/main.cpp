@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include <Wire.h>
 #include <Adafruit_AHTX0.h>
-#include <Adafruit_SGP30.h>
+#include <SGP30.h>
 #include <arduino_homekit_server.h>
 
 #include <Console.h>
@@ -32,7 +32,7 @@ extern "C" homekit_characteristic_t accessoryName;
 extern "C" homekit_server_config_t serverConfig;
 
 Adafruit_AHTX0 aht;
-Adafruit_SGP30 sgp;
+SGP30 sgp;
 VictorWeb webPortal(80);
 String hostName;
 unsigned long lastRead;
@@ -73,13 +73,6 @@ AirQuality parseAirQuality(float value) {
   return AirQualityPoor;
 }
 
-uint32_t getAbsoluteHumidity(float temperature, float humidity) {
-  // approximation formula from Sensirion SGP30 Driver Integration chapter 3.15
-  const float absoluteHumidity = 216.7f * ((humidity / 100.0f) * 6.112f * exp((17.62f * temperature) / (243.12f + temperature)) / (273.15f + temperature)); // [g/m^3]
-  const uint32_t absoluteHumidityScaled = static_cast<uint32_t>(1000.0f * absoluteHumidity); // [mg/m^3]
-  return absoluteHumidityScaled;
-}
-
 void measure(bool notify) {
   builtinLed.flash();
   // aht
@@ -115,10 +108,10 @@ void measure(bool notify) {
       .section(F("temperature"), String(temp.temperature))
       .section(F("humidity"), String(humidity.relative_humidity));
     // write to sgp
-    sgp.setHumidity(getAbsoluteHumidity(temp.temperature, humidity.relative_humidity));
+    sgp.setRelHumidity(temp.temperature, humidity.relative_humidity);
   }
   // sgp
-  const auto sgpOk = sgp.IAQmeasure();
+  const auto sgpOk = sgp.measure(true);;
   if (airQualityActiveState.value.bool_value != sgpOk) {
     airQualityActiveState.value.bool_value = sgpOk;
     if (notify) {
@@ -126,19 +119,21 @@ void measure(bool notify) {
     }
   }
   if (sgpOk) {
-    if (carbonDioxideState.value.float_value != sgp.eCO2) {
-      carbonDioxideState.value.float_value = sgp.eCO2;
+    const auto co2 = sgp.getCO2();
+    if (carbonDioxideState.value.float_value != co2) {
+      carbonDioxideState.value.float_value = co2;
       if (notify) {
         homekit_characteristic_notify(&carbonDioxideState, carbonDioxideState.value);
       }
     }
-    if (vocDensityState.value.float_value != sgp.TVOC) {
-      vocDensityState.value.float_value = sgp.TVOC;
+    const auto tvoc = sgp.getTVOC();
+    if (vocDensityState.value.float_value != tvoc) {
+      vocDensityState.value.float_value = tvoc;
       if (notify) {
         homekit_characteristic_notify(&vocDensityState, vocDensityState.value);
       }
     }
-    const auto quality = parseAirQuality(sgp.TVOC);
+    const auto quality = parseAirQuality(tvoc);
     if (airQualityState.value.uint8_value != quality) {
       airQualityState.value.uint8_value = quality;
       if (notify) {
@@ -147,8 +142,8 @@ void measure(bool notify) {
     }
     console.log()
       .bracket(F("sgp30"))
-      .section(F("TVOC"), String(sgp.TVOC))
-      .section(F("eCO2"), String(sgp.eCO2));
+      .section(F("TVOC"), String(tvoc))
+      .section(F("eCO2"), String(co2));
   }
 }
 
