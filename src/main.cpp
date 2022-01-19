@@ -53,19 +53,19 @@ String parseYesNo(bool state) {
 }
 
 AirQuality parseAirQuality(float value) {
-  // 0 ~ 99
-  if (value < 99) {
+  // 0 ~ 49
+  if (value < 49) {
     return AirQualityExcellent;
   }
-  // 100 ~ 199
-  if (value < 199) {
+  // 50 ~ 99
+  if (value < 99) {
     return AirQualityGood;
   }
-  // 200 ~ 399
+  // 100 ~ 299
   if (value < 399) {
     return AirQualityFair;
   }
-  // 400 ~ 599
+  // 300 ~ 599
   if (value < 599) {
     return AirQualityInferior;
   }

@@ -17,7 +17,7 @@ namespace Victor {
   struct AirSetting {
     uint8_t sdaPin = 4;
     uint8_t sclPin = 5;
-    uint8_t repeat = 5;
+    uint8_t repeat = 10; // seconds
   };
 
 } // namespace Victor
