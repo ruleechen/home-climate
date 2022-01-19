@@ -29,7 +29,7 @@ homekit_service_t informationService = HOMEKIT_SERVICE_(
 // format: float; min 0, max 100, step 0.1, unit celsius
 homekit_characteristic_t temperatureState = HOMEKIT_CHARACTERISTIC_(CURRENT_TEMPERATURE, 0);
 // format: bool; HAP section 9.96; true or false
-homekit_characteristic_t temperatureActiveState = HOMEKIT_CHARACTERISTIC_(STATUS_ACTIVE, true);
+homekit_characteristic_t temperatureActiveState = HOMEKIT_CHARACTERISTIC_(STATUS_ACTIVE, false);
 // service
 homekit_service_t temperatureService = HOMEKIT_SERVICE_(
   TEMPERATURE_SENSOR,
@@ -53,7 +53,7 @@ homekit_service_t temperatureInformationService = HOMEKIT_SERVICE_(
 // format: float; min 0, max 100, step 1
 homekit_characteristic_t humidityState = HOMEKIT_CHARACTERISTIC_(CURRENT_RELATIVE_HUMIDITY, 0);
 // format: bool; HAP section 9.96; true or false
-homekit_characteristic_t humidityActiveState = HOMEKIT_CHARACTERISTIC_(STATUS_ACTIVE, true);
+homekit_characteristic_t humidityActiveState = HOMEKIT_CHARACTERISTIC_(STATUS_ACTIVE, false);
 // service
 homekit_service_t humidityService = HOMEKIT_SERVICE_(
   HUMIDITY_SENSOR,
@@ -81,7 +81,7 @@ homekit_characteristic_t vocDensityState = HOMEKIT_CHARACTERISTIC_(VOC_DENSITY, 
 // format: uint8; HAP section 9.118; 0 = Unknown, 1 = Excellent, 2 = Good, 3 = Fair, 4 = Inferior, 5 = Poor
 homekit_characteristic_t airQualityState = HOMEKIT_CHARACTERISTIC_(AIR_QUALITY, 0);
 // format: bool; HAP section 9.96; true or false
-homekit_characteristic_t airQualityActiveState = HOMEKIT_CHARACTERISTIC_(STATUS_ACTIVE, true);
+homekit_characteristic_t airQualityActiveState = HOMEKIT_CHARACTERISTIC_(STATUS_ACTIVE, false);
 // service
 homekit_service_t airQualityService = HOMEKIT_SERVICE_(
   AIR_QUALITY_SENSOR,
