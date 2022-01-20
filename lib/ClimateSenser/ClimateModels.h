@@ -1,9 +1,15 @@
-#ifndef AirModels_h
-#define AirModels_h
+#ifndef ClimateModels_h
+#define ClimateModels_h
 
 #include <Arduino.h>
 
 namespace Victor {
+
+  struct ClimateSetting {
+    uint8_t sdaPin = 4;
+    uint8_t sclPin = 5;
+    uint8_t repeat = 10; // seconds
+  };
 
   enum AirQuality {
     AirQualityUnknown = 0,
@@ -14,12 +20,6 @@ namespace Victor {
     AirQualityPoor = 5,
   };
 
-  struct AirSetting {
-    uint8_t sdaPin = 4;
-    uint8_t sclPin = 5;
-    uint8_t repeat = 10; // seconds
-  };
-
 } // namespace Victor
 
-#endif // AirModels_h
+#endif // ClimateModels_h

@@ -1,25 +1,25 @@
-#include "AirStorage.h"
+#include "ClimateStorage.h"
 
 namespace Victor::Components {
 
-  AirStorage::AirStorage() {
-    _filePath = F("/air.json");
+  ClimateStorage::ClimateStorage() {
+    _filePath = F("/climate.json");
     _maxSize = 512;
   }
 
-  void AirStorage::_serializeTo(const AirSetting& model, DynamicJsonDocument& doc) {
+  void ClimateStorage::_serializeTo(const ClimateSetting& model, DynamicJsonDocument& doc) {
     doc[F("sda")] = model.sdaPin;
     doc[F("scl")] = model.sclPin;
     doc[F("repeat")] = model.repeat;
   }
 
-  void AirStorage::_deserializeFrom(AirSetting& model, const DynamicJsonDocument& doc) {
+  void ClimateStorage::_deserializeFrom(ClimateSetting& model, const DynamicJsonDocument& doc) {
     model.sdaPin = doc[F("sda")];
     model.sclPin = doc[F("scl")];
     model.repeat = doc[F("repeat")];
   }
 
   // global
-  AirStorage airStorage;
+  ClimateStorage climateStorage;
 
 } // namespace Victor::Components

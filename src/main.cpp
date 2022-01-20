@@ -10,8 +10,8 @@
 #include <VictorWifi.h>
 #include <VictorWeb.h>
 
-#include "AirModels.h"
-#include "AirStorage.h"
+#include "ClimateModels.h"
+#include "ClimateStorage.h"
 
 using namespace Victor;
 using namespace Victor::Components;
@@ -185,7 +185,7 @@ void setup(void) {
   arduino_homekit_setup(&serverConfig);
 
   // setup sensor
-  const auto model = airStorage.load();
+  const auto model = climateStorage.load();
   readInterval = model.repeat * 1000;
   Wire.begin(     // https://zhuanlan.zhihu.com/p/137568249
     model.sdaPin, // Inter-Integrated Circuit - Serial Data (I2C-SDA)

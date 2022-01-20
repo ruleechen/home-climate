@@ -44,7 +44,7 @@ homekit_service_t temperatureService = HOMEKIT_SERVICE_(
 homekit_service_t temperatureInformationService = HOMEKIT_SERVICE_(
   ACCESSORY_INFORMATION,
   .characteristics = (homekit_characteristic_t*[]) {
-    HOMEKIT_CHARACTERISTIC(NAME, "Victor-Temperature"),
+    HOMEKIT_CHARACTERISTIC(NAME, "Temperature"),
     &accessoryIdentify,
     NULL,
   },
@@ -68,7 +68,7 @@ homekit_service_t humidityService = HOMEKIT_SERVICE_(
 homekit_service_t humidityInformationService = HOMEKIT_SERVICE_(
   ACCESSORY_INFORMATION,
   .characteristics = (homekit_characteristic_t*[]) {
-    HOMEKIT_CHARACTERISTIC(NAME, "Victor-Humidity"),
+    HOMEKIT_CHARACTERISTIC(NAME, "Humidity"),
     &accessoryIdentify,
     NULL,
   },
@@ -98,7 +98,7 @@ homekit_service_t airQualityService = HOMEKIT_SERVICE_(
 homekit_service_t airQualityInformationService = HOMEKIT_SERVICE_(
   ACCESSORY_INFORMATION,
   .characteristics = (homekit_characteristic_t*[]) {
-    HOMEKIT_CHARACTERISTIC(NAME, "Victor-Air"),
+    HOMEKIT_CHARACTERISTIC(NAME, "Air Quality"),
     &accessoryIdentify,
     NULL,
   },

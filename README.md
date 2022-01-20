@@ -1,5 +1,5 @@
-# home-env
-Apple HomeKit environment sensor firmware
+# home-climate
+Apple HomeKit climate sensor firmware
 
 ### Development Tools
 - [Visual Studio Code](https://code.visualstudio.com/)
