@@ -3,7 +3,7 @@
 namespace Victor::Components {
 
   ClimateStorage::ClimateStorage() {
-    _filePath = F("/climate.json");
+    _filePath = "/climate.json";
     _maxSize = 512;
   }
 
