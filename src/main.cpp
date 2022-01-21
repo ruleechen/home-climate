@@ -34,11 +34,12 @@ extern "C" homekit_server_config_t serverConfig;
 AHT10 aht;
 SGP30 sgp;
 VictorWeb webPortal(80);
+
 String hostName;
 unsigned long lastRead;
 unsigned long readInterval;
 
-String parseStateName(uint8_t state) {
+String airQualityName(uint8_t state) {
   return (
     state == AirQualityExcellent ? F("Excellent") :
     state == AirQualityGood      ? F("Good") :
@@ -52,7 +53,7 @@ String parseYesNo(bool state) {
   return state == true ? F("Yes") : F("No");
 }
 
-AirQuality parseAirQuality(float value) {
+AirQuality toAirQuality(float value) {
   // 0 ~ 49
   if (value < 49) {
     return AirQualityExcellent;
@@ -134,7 +135,7 @@ void measure(bool notify) {
         homekit_characteristic_notify(&vocDensityState, vocDensityState.value);
       }
     }
-    const auto quality = parseAirQuality(tvoc);
+    const auto quality = toAirQuality(tvoc);
     if (airQualityState.value.uint8_value != quality) {
       airQualityState.value.uint8_value = quality;
       if (notify) {
@@ -168,11 +169,11 @@ void setup(void) {
     items.push_back({ .key = F("Humidity"),    .value = String(humidityState.value.float_value) + F("%") });
     items.push_back({ .key = F("CO2 Level"),   .value = String(carbonDioxideState.value.float_value) });
     items.push_back({ .key = F("VOC Density"), .value = String(vocDensityState.value.float_value) });
-    items.push_back({ .key = F("Air Quality"), .value = parseStateName(airQualityState.value.uint8_value) });
+    items.push_back({ .key = F("Air Quality"), .value = airQualityName(airQualityState.value.uint8_value) });
     items.push_back({ .key = F("Paired"),      .value = parseYesNo(homekit_is_paired()) });
     items.push_back({ .key = F("Clients"),     .value = String(arduino_homekit_connected_clients_count()) });
   };
-  webPortal.onServicePost = [](const String type) {
+  webPortal.onServicePost = [](const String& type) {
     if (type == F("reset")) {
       homekit_server_reset();
     }
