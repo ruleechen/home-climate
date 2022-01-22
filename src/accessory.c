@@ -30,6 +30,8 @@ homekit_service_t informationService = HOMEKIT_SERVICE_(
 homekit_characteristic_t temperatureState = HOMEKIT_CHARACTERISTIC_(CURRENT_TEMPERATURE, 0);
 // format: bool; HAP section 9.96; true or false
 homekit_characteristic_t temperatureActiveState = HOMEKIT_CHARACTERISTIC_(STATUS_ACTIVE, false);
+// format: string; HAP section 9.62; maximum length 64
+homekit_characteristic_t temperatureNameState = HOMEKIT_CHARACTERISTIC_(NAME, "Temperature");
 // service
 homekit_service_t temperatureService = HOMEKIT_SERVICE_(
   TEMPERATURE_SENSOR,
@@ -37,6 +39,7 @@ homekit_service_t temperatureService = HOMEKIT_SERVICE_(
   .characteristics = (homekit_characteristic_t*[]) {
     &temperatureState,
     &temperatureActiveState,
+    &temperatureNameState,
     NULL,
   },
 );
@@ -45,7 +48,7 @@ homekit_service_t temperatureInformationService = HOMEKIT_SERVICE_(
   ACCESSORY_INFORMATION,
   .characteristics = (homekit_characteristic_t*[]) {
     HOMEKIT_CHARACTERISTIC(NAME, "Temperature"),
-    &accessoryIdentify,
+    HOMEKIT_CHARACTERISTIC(IDENTIFY, onAccessoryIdentify),
     NULL,
   },
 );
@@ -54,6 +57,8 @@ homekit_service_t temperatureInformationService = HOMEKIT_SERVICE_(
 homekit_characteristic_t humidityState = HOMEKIT_CHARACTERISTIC_(CURRENT_RELATIVE_HUMIDITY, 0);
 // format: bool; HAP section 9.96; true or false
 homekit_characteristic_t humidityActiveState = HOMEKIT_CHARACTERISTIC_(STATUS_ACTIVE, false);
+// format: string; HAP section 9.62; maximum length 64
+homekit_characteristic_t humidityNameState = HOMEKIT_CHARACTERISTIC_(NAME, "Humidity");
 // service
 homekit_service_t humidityService = HOMEKIT_SERVICE_(
   HUMIDITY_SENSOR,
@@ -61,6 +66,7 @@ homekit_service_t humidityService = HOMEKIT_SERVICE_(
   .characteristics = (homekit_characteristic_t*[]) {
     &humidityState,
     &humidityActiveState,
+    &humidityNameState,
     NULL,
   },
 );
@@ -69,7 +75,7 @@ homekit_service_t humidityInformationService = HOMEKIT_SERVICE_(
   ACCESSORY_INFORMATION,
   .characteristics = (homekit_characteristic_t*[]) {
     HOMEKIT_CHARACTERISTIC(NAME, "Humidity"),
-    &accessoryIdentify,
+    HOMEKIT_CHARACTERISTIC(IDENTIFY, onAccessoryIdentify),
     NULL,
   },
 );
@@ -82,6 +88,8 @@ homekit_characteristic_t vocDensityState = HOMEKIT_CHARACTERISTIC_(VOC_DENSITY, 
 homekit_characteristic_t airQualityState = HOMEKIT_CHARACTERISTIC_(AIR_QUALITY, 0);
 // format: bool; HAP section 9.96; true or false
 homekit_characteristic_t airQualityActiveState = HOMEKIT_CHARACTERISTIC_(STATUS_ACTIVE, false);
+// format: string; HAP section 9.62; maximum length 64
+homekit_characteristic_t airQualityNameState = HOMEKIT_CHARACTERISTIC_(NAME, "Air Quality");
 // service
 homekit_service_t airQualityService = HOMEKIT_SERVICE_(
   AIR_QUALITY_SENSOR,
@@ -91,6 +99,7 @@ homekit_service_t airQualityService = HOMEKIT_SERVICE_(
     &vocDensityState,
     &airQualityState,
     &airQualityActiveState,
+    &airQualityNameState,
     NULL,
   },
 );
@@ -99,7 +108,7 @@ homekit_service_t airQualityInformationService = HOMEKIT_SERVICE_(
   ACCESSORY_INFORMATION,
   .characteristics = (homekit_characteristic_t*[]) {
     HOMEKIT_CHARACTERISTIC(NAME, "Air Quality"),
-    &accessoryIdentify,
+    HOMEKIT_CHARACTERISTIC(IDENTIFY, onAccessoryIdentify),
     NULL,
   },
 );
