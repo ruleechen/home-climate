@@ -31,8 +31,8 @@ extern "C" homekit_characteristic_t airQualityActiveState;
 extern "C" homekit_characteristic_t accessoryName;
 extern "C" homekit_server_config_t serverConfig;
 
-AHT10 aht;
-SGP30 sgp;
+AHT10 aht10;
+SGP30 sgp30;
 VictorWeb webPortal(80);
 
 String hostName;
@@ -76,29 +76,29 @@ AirQuality toAirQuality(float value) {
 
 void measure(bool notify) {
   builtinLed.flash();
-  // aht
-  const auto ahtOk = aht.readRawData() != AHT10_ERROR;
-  if (temperatureActiveState.value.bool_value != ahtOk) {
-    temperatureActiveState.value.bool_value = ahtOk;
+  // aht10
+  const auto htOk = aht10.readRawData() != AHT10_ERROR;
+  if (temperatureActiveState.value.bool_value != htOk) {
+    temperatureActiveState.value.bool_value = htOk;
     if (notify) {
       homekit_characteristic_notify(&temperatureActiveState, temperatureActiveState.value);
     }
   }
-  if (humidityActiveState.value.bool_value != ahtOk) {
-    humidityActiveState.value.bool_value = ahtOk;
+  if (humidityActiveState.value.bool_value != htOk) {
+    humidityActiveState.value.bool_value = htOk;
     if (notify) {
       homekit_characteristic_notify(&humidityActiveState, humidityActiveState.value);
     }
   }
-  if (ahtOk) {
-    const auto temperature = aht.readTemperature(AHT10_USE_READ_DATA);
+  if (htOk) {
+    const auto temperature = aht10.readTemperature(AHT10_USE_READ_DATA);
     if (temperatureState.value.float_value != temperature) {
       temperatureState.value.float_value = temperature;
       if (notify) {
         homekit_characteristic_notify(&temperatureState, temperatureState.value);
       }
     }
-    const auto humidity = aht.readHumidity(AHT10_USE_READ_DATA);
+    const auto humidity = aht10.readHumidity(AHT10_USE_READ_DATA);
     if (humidityState.value.float_value != humidity) {
       humidityState.value.float_value = humidity;
       if (notify) {
@@ -106,36 +106,36 @@ void measure(bool notify) {
       }
     }
     console.log()
-      .bracket(F("aht10"))
-      .section(F("temperature"), String(temperature))
-      .section(F("humidity"), String(humidity));
-    // write to sgp
-    sgp.setRelHumidity(temperature, humidity);
+      .bracket(F("ht"))
+      .section(F("h"), String(humidity))
+      .section(F("t"), String(temperature));
+    // write to sgp30
+    sgp30.setRelHumidity(temperature, humidity);
   }
-  // sgp
-  const auto sgpOk = sgp.measure(true);;
-  if (airQualityActiveState.value.bool_value != sgpOk) {
-    airQualityActiveState.value.bool_value = sgpOk;
+  // sgp30
+  const auto aqOk = sgp30.measure(true);;
+  if (airQualityActiveState.value.bool_value != aqOk) {
+    airQualityActiveState.value.bool_value = aqOk;
     if (notify) {
       homekit_characteristic_notify(&airQualityActiveState, airQualityActiveState.value);
     }
   }
-  if (sgpOk) {
-    const auto co2 = sgp.getCO2();
+  if (aqOk) {
+    const auto co2 = sgp30.getCO2();
     if (carbonDioxideState.value.float_value != co2) {
       carbonDioxideState.value.float_value = co2;
       if (notify) {
         homekit_characteristic_notify(&carbonDioxideState, carbonDioxideState.value);
       }
     }
-    const auto tvoc = sgp.getTVOC();
-    if (vocDensityState.value.float_value != tvoc) {
-      vocDensityState.value.float_value = tvoc;
+    const auto voc = sgp30.getTVOC();
+    if (vocDensityState.value.float_value != voc) {
+      vocDensityState.value.float_value = voc;
       if (notify) {
         homekit_characteristic_notify(&vocDensityState, vocDensityState.value);
       }
     }
-    const auto quality = toAirQuality(tvoc);
+    const auto quality = toAirQuality(voc);
     if (airQualityState.value.uint8_value != quality) {
       airQualityState.value.uint8_value = quality;
       if (notify) {
@@ -143,9 +143,9 @@ void measure(bool notify) {
       }
     }
     console.log()
-      .bracket(F("sgp30"))
-      .section(F("TVOC"), String(tvoc))
-      .section(F("eCO2"), String(co2));
+      .bracket(F("aq"))
+      .section(F("VOC"), String(voc))
+      .section(F("CO2"), String(co2));
   }
 }
 
@@ -165,7 +165,7 @@ void setup(void) {
   webPortal.onRequestEnd = []() { builtinLed.toggle(); };
   webPortal.onServiceGet = [](std::vector<KeyValueModel>& items) {
     items.push_back({ .key = F("Service"),     .value = VICTOR_ACCESSORY_SERVICE_NAME });
-    items.push_back({ .key = F("Temperature"), .value = String(temperatureState.value.float_value) + F("C") });
+    items.push_back({ .key = F("Temperature"), .value = String(temperatureState.value.float_value) + F("°C") });
     items.push_back({ .key = F("Humidity"),    .value = String(humidityState.value.float_value) + F("%") });
     items.push_back({ .key = F("CO2 Level"),   .value = String(carbonDioxideState.value.float_value) });
     items.push_back({ .key = F("VOC Density"), .value = String(vocDensityState.value.float_value) });
@@ -192,12 +192,12 @@ void setup(void) {
     model.sdaPin, // Inter-Integrated Circuit - Serial Data (I2C-SDA)
     model.sclPin  // Inter-Integrated Circuit - Serial Clock (I2C-SCL)
   );
-  if (aht.begin()) {
+  if (aht10.begin()) {
     console.log()
       .bracket(F("aht10"))
       .section(F("begin"));
   }
-  if (sgp.begin()) {
+  if (sgp30.begin()) {
     console.log()
       .bracket(F("sgp30"))
       .section(F("begin"));
