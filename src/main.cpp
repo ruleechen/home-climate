@@ -74,8 +74,7 @@ AirQuality toAirQuality(float value) {
   return AirQualityPoor;
 }
 
-void measure(bool notify) {
-  builtinLed.flash();
+void measureHT(bool notify) {
   // aht10
   const auto htOk = aht10.readRawData() != AHT10_ERROR;
   if (temperatureActiveState.value.bool_value != htOk) {
@@ -112,6 +111,9 @@ void measure(bool notify) {
     // write to sgp30
     sgp30.setRelHumidity(temperature, humidity);
   }
+}
+
+void measureAQ(bool notify) {
   // sgp30
   const auto aqOk = sgp30.measure(true);;
   if (airQualityActiveState.value.bool_value != aqOk) {
@@ -214,12 +216,18 @@ void setup(void) {
 }
 
 void loop(void) {
-  webPortal.loop();
   arduino_homekit_loop();
+  webPortal.loop();
   // loop sensor
   const auto now = millis();
   if (now - lastRead > readInterval) {
     lastRead = now;
-    measure(homekit_is_paired());
+    builtinLed.turnOn();
+    const auto notify = homekit_is_paired();
+    ESP.wdtFeed();
+    measureHT(notify);
+    delay(10); // cool down + feed watchdog
+    measureAQ(notify);
+    builtinLed.turnOff();
   }
 }
