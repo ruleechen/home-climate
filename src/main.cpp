@@ -91,14 +91,14 @@ void measureHT(bool notify) {
   }
   if (htOk) {
     const auto temperature = aht10.readTemperature(AHT10_USE_READ_DATA);
-    if (temperatureState.value.float_value != temperature) {
+    if (!isnanf(temperature) && temperatureState.value.float_value != temperature) {
       temperatureState.value.float_value = temperature;
       if (notify) {
         homekit_characteristic_notify(&temperatureState, temperatureState.value);
       }
     }
     const auto humidity = aht10.readHumidity(AHT10_USE_READ_DATA);
-    if (humidityState.value.float_value != humidity) {
+    if (!isnanf(humidity) && humidityState.value.float_value != humidity) {
       humidityState.value.float_value = humidity;
       if (notify) {
         homekit_characteristic_notify(&humidityState, humidityState.value);
@@ -124,24 +124,24 @@ void measureAQ(bool notify) {
   }
   if (aqOk) {
     const auto co2 = sgp30.getCO2();
-    if (carbonDioxideState.value.float_value != co2) {
+    if (!isnan(co2) && carbonDioxideState.value.float_value != co2) {
       carbonDioxideState.value.float_value = co2;
       if (notify) {
         homekit_characteristic_notify(&carbonDioxideState, carbonDioxideState.value);
       }
     }
     const auto voc = sgp30.getTVOC();
-    if (vocDensityState.value.float_value != voc) {
+    if (!isnan(voc) && vocDensityState.value.float_value != voc) {
       vocDensityState.value.float_value = voc;
       if (notify) {
         homekit_characteristic_notify(&vocDensityState, vocDensityState.value);
       }
-    }
-    const auto quality = toAirQuality(voc);
-    if (airQualityState.value.uint8_value != quality) {
-      airQualityState.value.uint8_value = quality;
-      if (notify) {
-        homekit_characteristic_notify(&airQualityState, airQualityState.value);
+      const auto quality = toAirQuality(voc);
+      if (airQualityState.value.uint8_value != quality) {
+        airQualityState.value.uint8_value = quality;
+        if (notify) {
+          homekit_characteristic_notify(&airQualityState, airQualityState.value);
+        }
       }
     }
     console.log()
