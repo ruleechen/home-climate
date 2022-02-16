@@ -91,17 +91,23 @@ void measureHT(bool notify) {
   }
   if (htOk) {
     const auto temperature = aht10.readTemperature(AHT10_USE_READ_DATA);
-    if (!isnanf(temperature) && temperatureState.value.float_value != temperature) {
-      temperatureState.value.float_value = temperature;
-      if (notify) {
-        homekit_characteristic_notify(&temperatureState, temperatureState.value);
+    if (!isnanf(temperature)) {
+      const auto temperatureFix = std::max<float>(0, std::min<float>(100, temperature)); // 0~100
+      if (temperatureState.value.float_value != temperatureFix) {
+        temperatureState.value.float_value = temperatureFix;
+        if (notify) {
+          homekit_characteristic_notify(&temperatureState, temperatureState.value);
+        }
       }
     }
     const auto humidity = aht10.readHumidity(AHT10_USE_READ_DATA);
-    if (!isnanf(humidity) && humidityState.value.float_value != humidity) {
-      humidityState.value.float_value = humidity;
-      if (notify) {
-        homekit_characteristic_notify(&humidityState, humidityState.value);
+    if (!isnanf(humidity)) {
+      const auto humidityFix = std::max<float>(0, std::min<float>(100, humidity)); // 0~100
+      if (humidityState.value.float_value != humidityFix) {
+        humidityState.value.float_value = humidityFix;
+        if (notify) {
+          homekit_characteristic_notify(&humidityState, humidityState.value);
+        }
       }
     }
     console.log()
@@ -124,23 +130,29 @@ void measureAQ(bool notify) {
   }
   if (aqOk) {
     const auto co2 = sgp30.getCO2();
-    if (!isnan(co2) && carbonDioxideState.value.float_value != co2) {
-      carbonDioxideState.value.float_value = co2;
-      if (notify) {
-        homekit_characteristic_notify(&carbonDioxideState, carbonDioxideState.value);
+    if (!isnan(co2)) {
+      const auto co2Fix = std::max<float>(0, std::min<float>(100000, co2)); // 0~100000
+      if (carbonDioxideState.value.float_value != co2Fix) {
+        carbonDioxideState.value.float_value = co2Fix;
+        if (notify) {
+          homekit_characteristic_notify(&carbonDioxideState, carbonDioxideState.value);
+        }
       }
     }
     const auto voc = sgp30.getTVOC();
-    if (!isnan(voc) && vocDensityState.value.float_value != voc) {
-      vocDensityState.value.float_value = voc;
-      if (notify) {
-        homekit_characteristic_notify(&vocDensityState, vocDensityState.value);
-      }
-      const auto quality = toAirQuality(voc);
-      if (airQualityState.value.uint8_value != quality) {
-        airQualityState.value.uint8_value = quality;
+    if (!isnan(voc)) {
+      const auto vocFix = std::max<float>(0, std::min<float>(1000, voc)); // 0~1000
+      if (vocDensityState.value.float_value != vocFix) {
+        vocDensityState.value.float_value = vocFix;
         if (notify) {
-          homekit_characteristic_notify(&airQualityState, airQualityState.value);
+          homekit_characteristic_notify(&vocDensityState, vocDensityState.value);
+        }
+        const auto quality = toAirQuality(vocFix);
+        if (airQualityState.value.uint8_value != quality) {
+          airQualityState.value.uint8_value = quality;
+          if (notify) {
+            homekit_characteristic_notify(&airQualityState, airQualityState.value);
+          }
         }
       }
     }
