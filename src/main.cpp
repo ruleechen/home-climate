@@ -187,8 +187,8 @@ void setup(void) {
     items.push_back({ .key = F("Paired"),      .value = toYesNoName(homekit_is_paired()) });
     items.push_back({ .key = F("Clients"),     .value = String(arduino_homekit_connected_clients_count()) });
   };
-  webPortal.onServicePost = [](const String& type) {
-    if (type == F("reset")) {
+  webPortal.onServicePost = [](const String& value) {
+    if (value == F("reset")) {
       homekit_server_reset();
     }
   };
