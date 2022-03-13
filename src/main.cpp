@@ -29,6 +29,7 @@ extern "C" homekit_characteristic_t airQualityState;
 extern "C" homekit_characteristic_t airQualityActiveState;
 // others
 extern "C" homekit_characteristic_t accessoryName;
+extern "C" homekit_characteristic_t accessorySerialNumber;
 extern "C" homekit_server_config_t serverConfig;
 
 AHT10 aht10;
@@ -36,6 +37,7 @@ SGP30 sgp30;
 VictorWeb webPortal(80);
 
 String hostName;
+String serialNumber;
 unsigned long lastRead;
 unsigned long readInterval;
 
@@ -196,7 +198,9 @@ void setup(void) {
 
   // setup homekit server
   hostName = victorWifi.getHostName();
+  serialNumber = String(VICTOR_ACCESSORY_INFORMATION_SERIAL_NUMBER) + "/" + victorWifi.getHostId();
   accessoryName.value.string_value = const_cast<char*>(hostName.c_str());
+  accessorySerialNumber.value.string_value =const_cast<char*>(serialNumber.c_str());
   arduino_homekit_setup(&serverConfig);
 
   // setup sensor
