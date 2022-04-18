@@ -8,7 +8,8 @@ namespace Victor {
   struct ClimateSetting {
     uint8_t sdaPin = 4;
     uint8_t sclPin = 5;
-    uint8_t repeat = 10; // seconds
+    uint8_t loopSeconds = 10;
+    uint8_t resetHours = 24;
   };
 
   enum AirQuality {

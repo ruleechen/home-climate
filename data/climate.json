@@ -1,1 +1,1 @@
-{"sda":4,"scl":5,"repeat":10}
+{"sda":4,"scl":5,"loop":10,"reset":24}

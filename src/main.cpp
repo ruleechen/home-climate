@@ -39,7 +39,9 @@ VictorWeb webPortal(80);
 String hostName;
 String serialNumber;
 unsigned long lastRead;
+unsigned long lastReset;
 unsigned long readInterval;
+unsigned long resetInterval;
 
 String toYesNoName(bool state) {
   return state == true ? F("Yes") : F("No");
@@ -214,7 +216,8 @@ void setup(void) {
 
   // setup sensor
   const auto model = climateStorage.load();
-  readInterval = model.repeat * 1000;
+  readInterval = (model.loopSeconds > 0 ? model.loopSeconds : 10) * 1000;
+  resetInterval = (model.resetHours > 0 ? model.resetHours : 24) * 60 * 60 * 1000;
   Wire.begin(     // https://zhuanlan.zhihu.com/p/137568249
     model.sdaPin, // Inter-Integrated Circuit - Serial Data (I2C-SDA)
     model.sclPin  // Inter-Integrated Circuit - Serial Clock (I2C-SCL)
@@ -254,5 +257,11 @@ void loop(void) {
     delay(10); // cool down + feed watchdog
     measureAQ(notify);
     builtinLed.turnOff();
+  }
+  // reset sensor
+  if (now - lastReset > resetInterval) {
+    lastReset = now;
+    aht10.softReset();
+    sgp30.GenericReset();
   }
 }
