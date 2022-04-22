@@ -4,14 +4,14 @@
 #include <SGP30.h>
 #include <arduino_homekit_server.h>
 
+#include <GlobalHelpers.h>
 #include <Console.h>
 #include <BuiltinLed.h>
 #include <VictorOTA.h>
 #include <VictorWifi.h>
 #include <VictorWeb.h>
 
-#include "ClimateModels.h"
-#include "ClimateStorage.h"
+#include <I2cStorage/I2cStorage.h>
 
 using namespace Victor;
 using namespace Victor::Components;
@@ -43,9 +43,14 @@ unsigned long lastReset;
 unsigned long readInterval;
 unsigned long resetInterval;
 
-String toYesNoName(bool state) {
-  return state == true ? F("Yes") : F("No");
-}
+enum AirQuality {
+  AirQualityUnknown = 0,
+  AirQualityExcellent = 1,
+  AirQualityGood = 2,
+  AirQualityFair = 3,
+  AirQualityInferior = 4,
+  AirQualityPoor = 5,
+};
 
 String toAirQualityName(uint8_t state) {
   return (
@@ -189,7 +194,7 @@ void setup(void) {
     states.push_back({ .text = F("CO2 Level"),   .value = String(carbonDioxideState.value.float_value) });
     states.push_back({ .text = F("VOC Density"), .value = String(vocDensityState.value.float_value) });
     states.push_back({ .text = F("Air Quality"), .value = toAirQualityName(airQualityState.value.uint8_value) });
-    states.push_back({ .text = F("Paired"),      .value = toYesNoName(homekit_is_paired()) });
+    states.push_back({ .text = F("Paired"),      .value = GlobalHelpers::toYesNoName(homekit_is_paired()) });
     states.push_back({ .text = F("Clients"),     .value = String(arduino_homekit_connected_clients_count()) });
     // buttons
     buttons.push_back({ .text = F("Unpair"), .value = F("Unpair") });
@@ -215,7 +220,8 @@ void setup(void) {
   arduino_homekit_setup(&serverConfig);
 
   // setup sensor
-  const auto model = climateStorage.load();
+  const auto i2cStorage = new I2cStorage("/climate.json");
+  const auto model = i2cStorage->load();
   readInterval = (model.loopSeconds > 0 ? model.loopSeconds : 10) * 1000;
   resetInterval = (model.resetHours > 0 ? model.resetHours : 24) * 60 * 60 * 1000;
   Wire.begin(     // https://zhuanlan.zhihu.com/p/137568249
