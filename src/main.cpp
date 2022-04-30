@@ -204,6 +204,7 @@ void setup(void) {
   webPortal.onServicePost = [](const String& value) {
     if (value == F("Unpair")) {
       homekit_server_reset();
+      ESP.restart();
     } else if (value == F("aht10")) {
       aht10.softReset();
     } else if (value == F("sgp30")) {
