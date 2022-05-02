@@ -12,6 +12,7 @@
 #include <VictorWeb.h>
 
 #include <I2cStorage/I2cStorage.h>
+#include "ClimateStorage.h"
 
 using namespace Victor;
 using namespace Victor::Components;
@@ -38,6 +39,8 @@ VictorWeb webPortal(80);
 
 String hostName;
 String serialNumber;
+
+ClimateModel climate;
 unsigned long lastRead;
 unsigned long lastReset;
 unsigned long readInterval;
@@ -99,8 +102,9 @@ void measureHT(bool notify) {
     }
   }
   if (htOk) {
-    const auto temperature = aht10.readTemperature(AHT10_USE_READ_DATA);
+    auto temperature = aht10.readTemperature(AHT10_USE_READ_DATA);
     if (!isnanf(temperature)) {
+      temperature += climate.revise.t;
       const auto temperatureFix = std::max<float>(0, std::min<float>(100, temperature)); // 0~100
       if (temperatureState.value.float_value != temperatureFix) {
         temperatureState.value.float_value = temperatureFix;
@@ -109,8 +113,9 @@ void measureHT(bool notify) {
         }
       }
     }
-    const auto humidity = aht10.readHumidity(AHT10_USE_READ_DATA);
+    auto humidity = aht10.readHumidity(AHT10_USE_READ_DATA);
     if (!isnanf(humidity)) {
+      humidity += climate.revise.h;
       const auto humidityFix = std::max<float>(0, std::min<float>(100, humidity)); // 0~100
       if (humidityState.value.float_value != humidityFix) {
         humidityState.value.float_value = humidityFix;
@@ -138,8 +143,9 @@ void measureAQ(bool notify) {
     }
   }
   if (aqOk) {
-    const auto co2 = sgp30.getCO2();
+    auto co2 = sgp30.getCO2();
     if (!isnan(co2)) {
+      co2 += climate.revise.co2;
       const auto co2Fix = std::max<float>(0, std::min<float>(100000, co2)); // 0~100000
       if (carbonDioxideState.value.float_value != co2Fix) {
         carbonDioxideState.value.float_value = co2Fix;
@@ -148,8 +154,9 @@ void measureAQ(bool notify) {
         }
       }
     }
-    const auto voc = sgp30.getTVOC();
+    auto voc = sgp30.getTVOC();
     if (!isnan(voc)) {
+      voc += climate.revise.voc;
       const auto vocFix = std::max<float>(0, std::min<float>(1000, voc)); // 0~1000
       if (vocDensityState.value.float_value != vocFix) {
         vocDensityState.value.float_value = vocFix;
@@ -221,13 +228,15 @@ void setup(void) {
   arduino_homekit_setup(&serverConfig);
 
   // setup sensor
+  const auto climateStorage = new ClimateStorage("/climate.json");
+  climate = climateStorage->load();
   const auto i2cStorage = new I2cStorage("/i2c.json");
-  const auto model = i2cStorage->load();
-  readInterval = (model.loopSeconds > 0 ? model.loopSeconds : 10) * 1000;
-  resetInterval = (model.resetHours > 0 ? model.resetHours : 24) * 60 * 60 * 1000;
-  Wire.begin(     // https://zhuanlan.zhihu.com/p/137568249
-    model.sdaPin, // Inter-Integrated Circuit - Serial Data (I2C-SDA)
-    model.sclPin  // Inter-Integrated Circuit - Serial Clock (I2C-SCL)
+  const auto i2c = i2cStorage->load();
+  readInterval = (i2c.loopSeconds > 0 ? i2c.loopSeconds : 10) * 1000;
+  resetInterval = (i2c.resetHours > 0 ? i2c.resetHours : 24) * 60 * 60 * 1000;
+  Wire.begin(   // https://zhuanlan.zhihu.com/p/137568249
+    i2c.sdaPin, // Inter-Integrated Circuit - Serial Data (I2C-SDA)
+    i2c.sclPin  // Inter-Integrated Circuit - Serial Clock (I2C-SCL)
   );
   if (aht10.begin()) {
     console.log()
