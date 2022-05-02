@@ -221,7 +221,7 @@ void setup(void) {
   arduino_homekit_setup(&serverConfig);
 
   // setup sensor
-  const auto i2cStorage = new I2cStorage("/climate.json");
+  const auto i2cStorage = new I2cStorage("/i2c.json");
   const auto model = i2cStorage->load();
   readInterval = (model.loopSeconds > 0 ? model.loopSeconds : 10) * 1000;
   resetInterval = (model.resetHours > 0 ? model.resetHours : 24) * 60 * 60 * 1000;
