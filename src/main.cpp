@@ -12,6 +12,7 @@
 #include <VictorWeb.h>
 
 #include <I2cStorage/I2cStorage.h>
+#include <Button/ToothpickButton.h>
 #include "ClimateStorage.h"
 
 using namespace Victor;
@@ -41,6 +42,7 @@ String hostName;
 String serialNumber;
 
 ClimateModel climate;
+ToothpickButton* button;
 unsigned long lastRead;
 unsigned long lastReset;
 unsigned long readInterval;
@@ -227,9 +229,23 @@ void setup(void) {
   accessorySerialNumber.value.string_value = const_cast<char*>(serialNumber.c_str());
   arduino_homekit_setup(&serverConfig);
 
-  // setup sensor
+  // climate
   const auto climateStorage = new ClimateStorage("/climate.json");
   climate = climateStorage->load();
+  if (climate.buttonPin > -1) {
+    button = new ToothpickButton(climate.buttonPin, climate.buttonTrueValue);
+    button->onClick = [](const ButtonAction action) {
+      if (action == ButtonRestart) {
+        ESP.restart();
+      } else if (action == ButtonRestore) {
+        homekit_server_reset();
+        ESP.eraseConfig();
+        ESP.restart();
+      }
+    };
+  }
+
+  // setup sensor
   const auto i2cStorage = new I2cStorage("/i2c.json");
   const auto i2c = i2cStorage->load();
   readInterval = (i2c.loopSeconds > 0 ? i2c.loopSeconds : 10) * 1000;
@@ -262,6 +278,9 @@ void setup(void) {
 void loop(void) {
   arduino_homekit_loop();
   webPortal.loop();
+  if (button) {
+    button->loop();
+  }
   // loop sensor
   const auto now = millis();
   if (now - lastRead > readInterval) {

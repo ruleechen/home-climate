@@ -8,6 +8,11 @@ namespace Victor::Components {
   }
 
   void ClimateStorage::_serializeTo(const ClimateModel& model, DynamicJsonDocument& doc) {
+    // button
+    const JsonArray buttonArr = doc.createNestedArray(F("button"));
+    buttonArr[0] = model.buttonPin;
+    buttonArr[1] = model.buttonTrueValue;
+    // revise
     const JsonObject reviseObj = doc.createNestedObject(F("revise"));
     reviseObj[F("h")] = model.revise.h;
     reviseObj[F("t")] = model.revise.t;
@@ -16,6 +21,11 @@ namespace Victor::Components {
   }
 
   void ClimateStorage::_deserializeFrom(ClimateModel& model, const DynamicJsonDocument& doc) {
+    // button
+    const auto buttonArr = doc[F("button")];
+    model.buttonPin = buttonArr[0];
+    model.buttonTrueValue = buttonArr[1];
+    // revise
     const auto reviseObj = doc[F("revise")];
     model.revise = {
       .h = reviseObj[F("h")],

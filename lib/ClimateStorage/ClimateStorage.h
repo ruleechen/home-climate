@@ -13,6 +13,8 @@ namespace Victor::Components {
   };
 
   struct ClimateModel {
+    int8_t buttonPin = -1;
+    uint8_t buttonTrueValue = 0; // LOW
     ReviseConfig revise;
   };
 
