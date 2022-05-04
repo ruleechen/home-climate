@@ -106,7 +106,7 @@ void measureHT(bool notify) {
   if (htOk) {
     auto temperature = aht10.readTemperature(AHT10_USE_READ_DATA);
     if (!isnanf(temperature)) {
-      temperature += climate.revise.t;
+      temperature += climate.revise.temperature;
       const auto temperatureFix = std::max<float>(0, std::min<float>(100, temperature)); // 0~100
       if (temperatureState.value.float_value != temperatureFix) {
         temperatureState.value.float_value = temperatureFix;
@@ -117,7 +117,7 @@ void measureHT(bool notify) {
     }
     auto humidity = aht10.readHumidity(AHT10_USE_READ_DATA);
     if (!isnanf(humidity)) {
-      humidity += climate.revise.h;
+      humidity += climate.revise.humidity;
       const auto humidityFix = std::max<float>(0, std::min<float>(100, humidity)); // 0~100
       if (humidityState.value.float_value != humidityFix) {
         humidityState.value.float_value = humidityFix;

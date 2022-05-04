@@ -14,8 +14,8 @@ namespace Victor::Components {
     buttonArr[1] = model.buttonTrueValue;
     // revise
     const JsonObject reviseObj = doc.createNestedObject(F("revise"));
-    reviseObj[F("h")] = model.revise.h;
-    reviseObj[F("t")] = model.revise.t;
+    reviseObj[F("h")] = model.revise.humidity;
+    reviseObj[F("t")] = model.revise.temperature;
     reviseObj[F("co2")] = model.revise.co2;
     reviseObj[F("voc")] = model.revise.voc;
   }
@@ -28,8 +28,8 @@ namespace Victor::Components {
     // revise
     const auto reviseObj = doc[F("revise")];
     model.revise = {
-      .h = reviseObj[F("h")],
-      .t = reviseObj[F("t")],
+      .humidity = reviseObj[F("h")],
+      .temperature = reviseObj[F("t")],
       .co2 = reviseObj[F("co2")],
       .voc = reviseObj[F("voc")],
     };

@@ -6,8 +6,8 @@
 namespace Victor::Components {
 
   struct ReviseConfig {
-    float h;
-    float t;
+    float humidity;
+    float temperature;
     float co2;
     float voc;
   };
