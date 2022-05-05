@@ -12,7 +12,7 @@
 #include <VictorWeb.h>
 
 #include <I2cStorage/I2cStorage.h>
-#include <Button/ToothpickButton.h>
+#include <Button/DigitalInputButton.h>
 #include "ClimateStorage.h"
 
 using namespace Victor;
@@ -42,7 +42,7 @@ String hostName;
 String serialNumber;
 
 ClimateModel climate;
-ToothpickButton* button;
+DigitalInputButton* button;
 unsigned long lastRead;
 unsigned long lastReset;
 unsigned long readInterval;
@@ -233,11 +233,11 @@ void setup(void) {
   const auto climateStorage = new ClimateStorage("/climate.json");
   climate = climateStorage->load();
   if (climate.buttonPin > -1) {
-    button = new ToothpickButton(climate.buttonPin, climate.buttonTrueValue);
-    button->onClick = [](const ButtonAction action) {
-      if (action == ButtonRestart) {
+    button = new DigitalInputButton(climate.buttonPin, climate.buttonTrueValue);
+    button->onAction = [](const ButtonAction action) {
+      if (action == ButtonActionRestart) {
         ESP.restart();
-      } else if (action == ButtonRestore) {
+      } else if (action == ButtonActionRestore) {
         homekit_server_reset();
         ESP.eraseConfig();
         ESP.restart();
