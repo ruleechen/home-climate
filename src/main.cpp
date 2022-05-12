@@ -43,6 +43,7 @@ String serialNumber;
 
 ClimateModel climate;
 DigitalInputButton* button;
+bool ledIndicator = false;
 unsigned long lastRead;
 unsigned long lastReset;
 unsigned long readInterval;
@@ -235,7 +236,10 @@ void setup(void) {
   if (climate.buttonPin > -1) {
     button = new DigitalInputButton(climate.buttonPin, climate.buttonTrueValue);
     button->onAction = [](const ButtonAction action) {
-      if (action == ButtonActionRestart) {
+      if (action == ButtonActionDoublePressed) {
+        builtinLed.flash();
+        ledIndicator = !ledIndicator;
+      } else if (action == ButtonActionRestart) {
         ESP.restart();
       } else if (action == ButtonActionRestore) {
         homekit_server_reset();
@@ -285,13 +289,16 @@ void loop(void) {
   const auto now = millis();
   if (now - lastRead > readInterval) {
     lastRead = now;
-    builtinLed.turnOn();
+    if (ledIndicator) {
+      builtinLed.turnOn();
+    }
     const auto notify = homekit_is_paired();
     ESP.wdtFeed();
     measureHT(notify);
-    delay(10); // cool down + feed watchdog
     measureAQ(notify);
-    builtinLed.turnOff();
+    if (ledIndicator) {
+      builtinLed.turnOff();
+    }
   }
   // reset sensor
   if (now - lastReset > resetInterval) {
