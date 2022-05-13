@@ -236,14 +236,15 @@ void setup(void) {
   if (climate.buttonPin > -1) {
     button = new DigitalInputButton(climate.buttonPin, climate.buttonTrueValue);
     button->onAction = [](const ButtonAction action) {
-      if (action == ButtonActionDoublePressed) {
+      if (action == ButtonActionPressed) {
         builtinLed.flash();
+      } else if (action == ButtonActionDoublePressed) {
+        builtinLed.flash(200);
         ledIndicator = !ledIndicator;
       } else if (action == ButtonActionRestart) {
         ESP.restart();
       } else if (action == ButtonActionRestore) {
         homekit_server_reset();
-        ESP.eraseConfig();
         ESP.restart();
       }
     };
