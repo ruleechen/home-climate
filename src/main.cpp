@@ -90,7 +90,6 @@ AirQuality toAirQuality(float value) {
 }
 
 void measureHT(bool notify) {
-  // aht10
   const auto htOk = aht10.readRawData() != AHT10_ERROR;
   if (temperatureActiveState.value.bool_value != htOk) {
     temperatureActiveState.value.bool_value = htOk;
@@ -131,13 +130,12 @@ void measureHT(bool notify) {
       .bracket(F("ht"))
       .section(F("h"), String(humidity))
       .section(F("t"), String(temperature));
-    // write to sgp30
+    // write to AQ
     sgp30.setRelHumidity(temperature, humidity);
   }
 }
 
 void measureAQ(bool notify) {
-  // sgp30
   const auto aqOk = sgp30.measure(true);;
   if (airQualityActiveState.value.bool_value != aqOk) {
     airQualityActiveState.value.bool_value = aqOk;
@@ -207,17 +205,17 @@ void setup(void) {
     states.push_back({ .text = F("Paired"),      .value = GlobalHelpers::toYesNoName(homekit_is_paired()) });
     states.push_back({ .text = F("Clients"),     .value = String(arduino_homekit_connected_clients_count()) });
     // buttons
-    buttons.push_back({ .text = F("Unpair"), .value = F("Unpair") });
-    buttons.push_back({ .text = F("aht10"), .value = F("aht10") });
-    buttons.push_back({ .text = F("sgp30"), .value = F("sgp30") });
+    buttons.push_back({ .text = F("Unpair"), .value = F("Unpair") }); // Unpair HomeKit
+    buttons.push_back({ .text = F("Reset(HT)"), .value = F("ht") });  // Humidity/Temperature
+    buttons.push_back({ .text = F("Reset(AQ)"), .value = F("aq") });  // Air Quality
   };
   webPortal.onServicePost = [](const String& value) {
     if (value == F("Unpair")) {
       homekit_server_reset();
       ESP.restart();
-    } else if (value == F("aht10")) {
+    } else if (value == F("ht")) {
       aht10.softReset();
-    } else if (value == F("sgp30")) {
+    } else if (value == F("aq")) {
       sgp30.GenericReset();
     }
   };
