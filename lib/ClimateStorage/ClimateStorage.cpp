@@ -2,9 +2,8 @@
 
 namespace Victor::Components {
 
-  ClimateStorage::ClimateStorage(const char* filePath) {
-    _filePath = filePath;
-    _maxSize = 512;
+  ClimateStorage::ClimateStorage(const char* filePath) : FileStorage(filePath) {
+    _maxSize = 256;
   }
 
   void ClimateStorage::_serializeTo(const ClimateModel& model, DynamicJsonDocument& doc) {

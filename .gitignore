@@ -8,4 +8,6 @@
 node_modules
 data/web
 data/app.json
+data/ota.json
 data/radio.json
+data/wifi.json

@@ -13,6 +13,7 @@
     "println",
     "wifi",
     "ssid",
+    "pswd",
     "rssi",
     "mDNS",
     "mithril",

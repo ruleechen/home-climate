@@ -175,8 +175,8 @@ void measureAQ(bool notify) {
     }
     console.log()
       .bracket(F("aq"))
-      .section(F("VOC"), String(voc))
-      .section(F("CO2"), String(co2));
+      .section(F("voc"), String(voc))
+      .section(F("co2"), String(co2));
   }
 }
 
@@ -190,6 +190,8 @@ void setup(void) {
 
   builtinLed.setup();
   builtinLed.turnOn();
+  victorOTA.setup();
+  victorWifi.setup();
 
   // setup web
   webPortal.onRequestStart = []() { builtinLed.toggle(); };
@@ -267,10 +269,6 @@ void setup(void) {
       .bracket(F("sgp30"))
       .section(F("begin"));
   }
-
-  // setup wifi
-  victorOTA.setup();
-  victorWifi.setup();
 
   // done
   console.log()
