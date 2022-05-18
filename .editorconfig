@@ -13,5 +13,5 @@ indent_size = 4
 [*.ini]
 trim_trailing_whitespace = false
 
-[/data/*.json]
+[**/data/*.json]
 insert_final_newline = false
