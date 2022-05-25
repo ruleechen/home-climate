@@ -1,6 +1,6 @@
 #include <Arduino.h>
 #include <Wire.h>
-#include <AHT10.h>
+#include <SHT31.h>
 #include <SGP30.h>
 #include <arduino_homekit_server.h>
 
@@ -34,7 +34,7 @@ extern "C" homekit_characteristic_t accessoryName;
 extern "C" homekit_characteristic_t accessorySerialNumber;
 extern "C" homekit_server_config_t serverConfig;
 
-AHT10 aht10;
+SHT31 sht30;
 SGP30 sgp30;
 VictorWeb webPortal(80);
 
@@ -90,7 +90,7 @@ AirQuality toAirQuality(float value) {
 }
 
 void measureHT(bool notify) {
-  const auto htOk = aht10.readRawData() != AHT10_ERROR;
+  const auto htOk = sht30.read();
   if (temperatureActiveState.value.bool_value != htOk) {
     temperatureActiveState.value.bool_value = htOk;
     if (notify) {
@@ -104,7 +104,7 @@ void measureHT(bool notify) {
     }
   }
   if (htOk) {
-    auto temperature = aht10.readTemperature(AHT10_USE_READ_DATA);
+    auto temperature = sht30.getTemperature();
     if (!isnanf(temperature)) {
       temperature += climate.revise.temperature;
       const auto temperatureFix = std::max<float>(0, std::min<float>(100, temperature)); // 0~100
@@ -115,7 +115,7 @@ void measureHT(bool notify) {
         }
       }
     }
-    auto humidity = aht10.readHumidity(AHT10_USE_READ_DATA);
+    auto humidity = sht30.getHumidity();
     if (!isnanf(humidity)) {
       humidity += climate.revise.humidity;
       const auto humidityFix = std::max<float>(0, std::min<float>(100, humidity)); // 0~100
@@ -216,7 +216,7 @@ void setup(void) {
       homekit_server_reset();
       ESP.restart();
     } else if (value == F("ht")) {
-      aht10.softReset();
+      sht30.reset();
     } else if (value == F("aq")) {
       sgp30.GenericReset();
     }
@@ -259,9 +259,9 @@ void setup(void) {
     i2c.sdaPin, // Inter-Integrated Circuit - Serial Data (I2C-SDA)
     i2c.sclPin  // Inter-Integrated Circuit - Serial Clock (I2C-SCL)
   );
-  if (aht10.begin()) {
+  if (sht30.begin()) {
     console.log()
-      .bracket(F("aht10"))
+      .bracket(F("sht30"))
       .section(F("begin"));
   }
   if (sgp30.begin()) {
@@ -300,7 +300,7 @@ void loop(void) {
   // reset sensor
   if (now - lastReset > resetInterval) {
     lastReset = now;
-    aht10.softReset();
+    sht30.reset();
     sgp30.GenericReset();
   }
 }
