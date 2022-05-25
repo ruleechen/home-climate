@@ -7,6 +7,8 @@ namespace Victor::Components {
   }
 
   void ClimateStorage::_serializeTo(const ClimateModel& model, DynamicJsonDocument& doc) {
+    // htSensor
+    doc[F("hts")] = model.htSensor;
     // button
     const JsonArray buttonArr = doc.createNestedArray(F("button"));
     buttonArr[0] = model.buttonPin;
@@ -20,6 +22,8 @@ namespace Victor::Components {
   }
 
   void ClimateStorage::_deserializeFrom(ClimateModel& model, const DynamicJsonDocument& doc) {
+    // htSensor
+    model.htSensor = doc[F("hts")];
     // button
     const auto buttonArr = doc[F("button")];
     model.buttonPin = buttonArr[0];

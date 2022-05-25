@@ -1,6 +1,5 @@
 #include <Arduino.h>
 #include <Wire.h>
-#include <SHT31.h>
 #include <SGP30.h>
 #include <arduino_homekit_server.h>
 
@@ -14,6 +13,7 @@
 #include <I2cStorage/I2cStorage.h>
 #include <Button/DigitalInputButton.h>
 #include "ClimateStorage.h"
+#include "HTSensor.h"
 
 using namespace Victor;
 using namespace Victor::Components;
@@ -34,7 +34,7 @@ extern "C" homekit_characteristic_t accessoryName;
 extern "C" homekit_characteristic_t accessorySerialNumber;
 extern "C" homekit_server_config_t serverConfig;
 
-SHT31 sht30;
+HTSensor* ht;
 SGP30 sgp30;
 VictorWeb webPortal(80);
 
@@ -90,7 +90,7 @@ AirQuality toAirQuality(float value) {
 }
 
 void measureHT(bool notify) {
-  const auto htOk = sht30.read();
+  const auto htOk = ht->read();
   if (temperatureActiveState.value.bool_value != htOk) {
     temperatureActiveState.value.bool_value = htOk;
     if (notify) {
@@ -104,7 +104,7 @@ void measureHT(bool notify) {
     }
   }
   if (htOk) {
-    auto temperature = sht30.getTemperature();
+    auto temperature = ht->getTemperature();
     if (!isnanf(temperature)) {
       temperature += climate.revise.temperature;
       const auto temperatureFix = std::max<float>(0, std::min<float>(100, temperature)); // 0~100
@@ -115,7 +115,7 @@ void measureHT(bool notify) {
         }
       }
     }
-    auto humidity = sht30.getHumidity();
+    auto humidity = ht->getHumidity();
     if (!isnanf(humidity)) {
       humidity += climate.revise.humidity;
       const auto humidityFix = std::max<float>(0, std::min<float>(100, humidity)); // 0~100
@@ -208,7 +208,9 @@ void setup(void) {
     states.push_back({ .text = F("Clients"),     .value = String(arduino_homekit_connected_clients_count()) });
     // buttons
     buttons.push_back({ .text = F("UnPair"),   .value = F("UnPair") }); // UnPair HomeKit
-    buttons.push_back({ .text = F("Reset-HT"), .value = F("ht") });  // Humidity/Temperature
+    if (ht) {
+      buttons.push_back({ .text = F("Reset-HT"), .value = F("ht") });  // Humidity/Temperature
+    }
     buttons.push_back({ .text = F("Reset-AQ"), .value = F("aq") });  // Air Quality
   };
   webPortal.onServicePost = [](const String& value) {
@@ -216,7 +218,7 @@ void setup(void) {
       homekit_server_reset();
       ESP.restart();
     } else if (value == F("ht")) {
-      sht30.reset();
+      ht->reset();
     } else if (value == F("aq")) {
       sgp30.GenericReset();
     }
@@ -259,10 +261,13 @@ void setup(void) {
     i2c.sdaPin, // Inter-Integrated Circuit - Serial Data (I2C-SDA)
     i2c.sclPin  // Inter-Integrated Circuit - Serial Clock (I2C-SCL)
   );
-  if (sht30.begin()) {
-    console.log()
-      .bracket(F("sht30"))
-      .section(F("begin"));
+  if (climate.htSensor != HTSensorOFF) {
+    ht = new HTSensor(climate.htSensor);
+    if (ht->begin()) {
+      console.log()
+        .bracket(F("ht"))
+        .section(F("begin"));
+    }
   }
   if (sgp30.begin()) {
     console.log()
@@ -291,7 +296,9 @@ void loop(void) {
     }
     const auto notify = homekit_is_paired();
     ESP.wdtFeed();
-    measureHT(notify);
+    if (ht) {
+      measureHT(notify);
+    }
     measureAQ(notify);
     if (ledIndicator) {
       builtinLed.turnOff();
@@ -300,7 +307,9 @@ void loop(void) {
   // reset sensor
   if (now - lastReset > resetInterval) {
     lastReset = now;
-    sht30.reset();
+    if (ht) {
+      ht->reset();
+    }
     sgp30.GenericReset();
   }
 }

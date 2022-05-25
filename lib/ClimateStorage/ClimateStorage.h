@@ -5,6 +5,12 @@
 
 namespace Victor::Components {
 
+  enum HTSensorType {
+    HTSensorOFF = 0,
+    HTSensorAHT10 = 1,
+    HTSensorSHT30 = 2,
+  };
+
   struct ReviseConfig {
     float humidity;
     float temperature;
@@ -15,6 +21,7 @@ namespace Victor::Components {
   struct ClimateModel {
     int8_t buttonPin = -1;
     uint8_t buttonTrueValue = 0; // LOW
+    HTSensorType htSensor = HTSensorAHT10;
     ReviseConfig revise;
   };
 
