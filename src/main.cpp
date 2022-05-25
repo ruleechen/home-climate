@@ -164,12 +164,12 @@ void measureAQ(bool notify) {
         if (notify) {
           homekit_characteristic_notify(&vocDensityState, vocDensityState.value);
         }
-        const auto quality = toAirQuality(vocFix);
-        if (airQualityState.value.uint8_value != quality) {
-          airQualityState.value.uint8_value = quality;
-          if (notify) {
-            homekit_characteristic_notify(&airQualityState, airQualityState.value);
-          }
+      }
+      const auto quality = toAirQuality(vocFix);
+      if (airQualityState.value.uint8_value != quality) {
+        airQualityState.value.uint8_value = quality;
+        if (notify) {
+          homekit_characteristic_notify(&airQualityState, airQualityState.value);
         }
       }
     }
