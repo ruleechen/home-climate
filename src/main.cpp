@@ -1,6 +1,5 @@
 #include <Arduino.h>
 #include <Wire.h>
-#include <SGP30.h>
 #include <arduino_homekit_server.h>
 
 #include <GlobalHelpers.h>
@@ -14,6 +13,7 @@
 #include <Button/DigitalInputButton.h>
 #include "ClimateStorage.h"
 #include "HTSensor.h"
+#include "AQSensor.h"
 
 using namespace Victor;
 using namespace Victor::Components;
@@ -35,7 +35,7 @@ extern "C" homekit_characteristic_t accessorySerialNumber;
 extern "C" homekit_server_config_t serverConfig;
 
 HTSensor* ht;
-SGP30 sgp30;
+AQSensor* aq;
 VictorWeb webPortal(80);
 
 String hostName;
@@ -131,12 +131,14 @@ void measureHT(bool notify) {
       .section(F("h"), String(humidity))
       .section(F("t"), String(temperature));
     // write to AQ
-    sgp30.setRelHumidity(temperature, humidity);
+    if (aq) {
+      aq->setRelHumidity(temperature, humidity);
+    }
   }
 }
 
 void measureAQ(bool notify) {
-  const auto aqOk = sgp30.measure(true);;
+  const auto aqOk = aq->measure();
   if (airQualityActiveState.value.bool_value != aqOk) {
     airQualityActiveState.value.bool_value = aqOk;
     if (notify) {
@@ -144,7 +146,7 @@ void measureAQ(bool notify) {
     }
   }
   if (aqOk) {
-    auto co2 = sgp30.getCO2();
+    auto co2 = aq->getCO2();
     if (!isnan(co2)) {
       co2 += climate.revise.co2;
       const auto co2Fix = std::max<float>(0, std::min<float>(100000, co2)); // 0~100000
@@ -155,7 +157,7 @@ void measureAQ(bool notify) {
         }
       }
     }
-    auto voc = sgp30.getTVOC();
+    auto voc = aq->getTVOC();
     if (!isnan(voc)) {
       voc += climate.revise.voc;
       const auto vocFix = std::max<float>(0, std::min<float>(1000, voc)); // 0~1000
@@ -211,7 +213,9 @@ void setup(void) {
     if (ht) {
       buttons.push_back({ .text = F("Reset-HT"), .value = F("ht") });  // Humidity/Temperature
     }
-    buttons.push_back({ .text = F("Reset-AQ"), .value = F("aq") });  // Air Quality
+    if (aq) {
+      buttons.push_back({ .text = F("Reset-AQ"), .value = F("aq") });  // Air Quality
+    }
   };
   webPortal.onServicePost = [](const String& value) {
     if (value == F("UnPair")) {
@@ -220,7 +224,7 @@ void setup(void) {
     } else if (value == F("ht")) {
       ht->reset();
     } else if (value == F("aq")) {
-      sgp30.GenericReset();
+      aq->reset();
     }
   };
   webPortal.setup();
@@ -269,10 +273,13 @@ void setup(void) {
         .section(F("begin"));
     }
   }
-  if (sgp30.begin()) {
-    console.log()
-      .bracket(F("sgp30"))
-      .section(F("begin"));
+  if (climate.aqSensor != AQSensorOFF) {
+    aq = new AQSensor(climate.aqSensor);
+    if (aq->begin()) {
+      console.log()
+        .bracket(F("aq"))
+        .section(F("begin"));
+    }
   }
 
   // done
@@ -299,7 +306,9 @@ void loop(void) {
     if (ht) {
       measureHT(notify);
     }
-    measureAQ(notify);
+    if (aq) {
+      measureAQ(notify);
+    }
     if (ledIndicator) {
       builtinLed.turnOff();
     }
@@ -310,6 +319,8 @@ void loop(void) {
     if (ht) {
       ht->reset();
     }
-    sgp30.GenericReset();
+    if (aq) {
+      aq->reset();
+    }
   }
 }

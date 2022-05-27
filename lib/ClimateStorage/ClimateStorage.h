@@ -11,6 +11,11 @@ namespace Victor::Components {
     HTSensorSHT30 = 2,
   };
 
+  enum AQSensorType {
+    AQSensorOFF = 0,
+    AQSensorSGP30 = 1,
+  };
+
   struct ReviseConfig {
     float humidity;
     float temperature;
@@ -22,6 +27,7 @@ namespace Victor::Components {
     int8_t buttonPin = -1;
     uint8_t buttonTrueValue = 0; // LOW
     HTSensorType htSensor = HTSensorAHT10;
+    AQSensorType aqSensor = AQSensorSGP30;
     ReviseConfig revise;
   };
 
