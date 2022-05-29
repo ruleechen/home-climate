@@ -43,7 +43,7 @@ String serialNumber;
 
 ClimateModel climate;
 DigitalInputButton* button;
-bool ledIndicator = false;
+bool debugEnabled = false;
 unsigned long lastRead;
 unsigned long lastReset;
 unsigned long readInterval;
@@ -242,11 +242,15 @@ void setup(void) {
   if (climate.buttonPin > -1) {
     button = new DigitalInputButton(climate.buttonPin, climate.buttonTrueValue);
     button->onAction = [](const ButtonAction action) {
+      console.log()
+        .bracket(F("button"))
+        .section(F("action"), String(action));
       if (action == ButtonActionPressed) {
         builtinLed.flash();
       } else if (action == ButtonActionDoublePressed) {
-        builtinLed.flash(200);
-        ledIndicator = !ledIndicator;
+        builtinLed.flash(500);
+        debugEnabled = !debugEnabled;
+        victorWifi.enableAP(debugEnabled);
       } else if (action == ButtonActionRestart) {
         ESP.restart();
       } else if (action == ButtonActionRestore) {
@@ -298,7 +302,7 @@ void loop(void) {
   const auto now = millis();
   if (now - lastRead > readInterval) {
     lastRead = now;
-    if (ledIndicator) {
+    if (debugEnabled) {
       builtinLed.turnOn();
     }
     const auto notify = homekit_is_paired();
@@ -309,7 +313,7 @@ void loop(void) {
     if (aq) {
       measureAQ(notify);
     }
-    if (ledIndicator) {
+    if (debugEnabled) {
       builtinLed.turnOff();
     }
   }
