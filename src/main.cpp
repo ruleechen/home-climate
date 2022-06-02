@@ -10,7 +10,7 @@
 #include <VictorWeb.h>
 
 #include <I2cStorage/I2cStorage.h>
-#include <Button/DigitalInputButton.h>
+#include <Button/DigitalInterruptButton.h>
 #include "ClimateStorage.h"
 #include "HTSensor.h"
 #include "AQSensor.h"
@@ -42,8 +42,7 @@ String hostName;
 String serialNumber;
 
 ClimateModel climate;
-DigitalInputButton* button;
-bool debugEnabled = false;
+DigitalInterruptButton* button;
 unsigned long lastRead;
 unsigned long lastReset;
 unsigned long readInterval;
@@ -240,7 +239,7 @@ void setup(void) {
   const auto climateStorage = new ClimateStorage("/climate.json");
   climate = climateStorage->load();
   if (climate.buttonPin > -1) {
-    button = new DigitalInputButton(climate.buttonPin, climate.buttonTrueValue);
+    button = new DigitalInterruptButton(climate.buttonPin, climate.buttonTrueValue);
     button->onAction = [](const ButtonAction action) {
       console.log()
         .bracket(F("button"))
@@ -249,8 +248,8 @@ void setup(void) {
         builtinLed.flash();
       } else if (action == ButtonActionDoublePressed) {
         builtinLed.flash(500);
-        debugEnabled = !debugEnabled;
-        victorWifi.enableAP(debugEnabled);
+        const auto enable = victorWifi.isLightSleepMode();
+        victorWifi.enableAP(enable); // toggle enabling ap
       } else if (action == ButtonActionRestart) {
         ESP.restart();
       } else if (action == ButtonActionRestore) {
@@ -298,11 +297,15 @@ void loop(void) {
   if (button) {
     button->loop();
   }
+  const auto lightSleep = (
+    victorWifi.isLightSleepMode() &&
+    arduino_homekit_get_running_server()->paired
+  );
   // loop sensor
   const auto now = millis();
   if (now - lastRead > readInterval) {
     lastRead = now;
-    if (debugEnabled) {
+    if (!lightSleep) {
       builtinLed.turnOn();
     }
     const auto notify = homekit_is_paired();
@@ -313,7 +316,7 @@ void loop(void) {
     if (aq) {
       measureAQ(notify);
     }
-    if (debugEnabled) {
+    if (!lightSleep) {
       builtinLed.turnOff();
     }
   }
@@ -326,5 +329,9 @@ void loop(void) {
     if (aq) {
       aq->reset();
     }
+  }
+  // sleep
+  if (lightSleep) {
+    delay(200);
   }
 }
