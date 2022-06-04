@@ -2,15 +2,10 @@
 #include <Wire.h>
 #include <arduino_homekit_server.h>
 
-#include <GlobalHelpers.h>
-#include <Console.h>
-#include <BuiltinLed.h>
-#include <VictorOTA.h>
-#include <VictorWifi.h>
-#include <VictorWeb.h>
-
+#include <AppMain/AppMain.h>
 #include <I2cStorage/I2cStorage.h>
 #include <Button/DigitalInterruptButton.h>
+
 #include "ClimateStorage.h"
 #include "HTSensor.h"
 #include "AQSensor.h"
@@ -34,9 +29,10 @@ extern "C" homekit_characteristic_t accessoryName;
 extern "C" homekit_characteristic_t accessorySerialNumber;
 extern "C" homekit_server_config_t serverConfig;
 
+AppMain* appMain;
+
 HTSensor* ht;
 AQSensor* aq;
-VictorWeb webPortal(80);
 
 String hostName;
 String serialNumber;
@@ -182,22 +178,14 @@ void measureAQ(bool notify) {
 }
 
 void setup(void) {
-  console.begin(115200);
-  if (!LittleFS.begin()) {
-    console.error()
-      .bracket(F("fs"))
-      .section(F("mount failed"));
-  }
-
-  builtinLed.setup();
-  builtinLed.turnOn();
-  victorOTA.setup();
-  victorWifi.setup();
+  appMain = new AppMain();
+  appMain->setup({
+    .web = true,
+    .radio = false,
+  });
 
   // setup web
-  webPortal.onRequestStart = []() { builtinLed.toggle(); };
-  webPortal.onRequestEnd = []() { builtinLed.toggle(); };
-  webPortal.onServiceGet = [](std::vector<TextValueModel>& states, std::vector<TextValueModel>& buttons) {
+  appMain->webPortal->onServiceGet = [](std::vector<TextValueModel>& states, std::vector<TextValueModel>& buttons) {
     // states
     states.push_back({ .text = F("Service"),     .value = VICTOR_ACCESSORY_SERVICE_NAME });
     states.push_back({ .text = F("Temperature"), .value = String(temperatureState.value.float_value) + F("°C") });
@@ -216,7 +204,7 @@ void setup(void) {
       buttons.push_back({ .text = F("Reset-AQ"), .value = F("aq") });  // Air Quality
     }
   };
-  webPortal.onServicePost = [](const String& value) {
+  appMain->webPortal->onServicePost = [](const String& value) {
     if (value == F("UnPair")) {
       homekit_server_reset();
       ESP.restart();
@@ -226,7 +214,6 @@ void setup(void) {
       aq->reset();
     }
   };
-  webPortal.setup();
 
   // setup homekit server
   hostName = victorWifi.getHostName();
@@ -293,7 +280,6 @@ void setup(void) {
 
 void loop(void) {
   arduino_homekit_loop();
-  webPortal.loop();
   if (button) {
     button->loop();
   }
@@ -331,7 +317,5 @@ void loop(void) {
     }
   }
   // sleep
-  if (lightSleep) {
-    delay(200);
-  }
+  appMain->loop(lightSleep);
 }
