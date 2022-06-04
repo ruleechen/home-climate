@@ -30,6 +30,7 @@ extern "C" homekit_characteristic_t accessorySerialNumber;
 extern "C" homekit_server_config_t serverConfig;
 
 AppMain* appMain;
+DigitalInterruptButton* button;
 
 HTSensor* ht;
 AQSensor* aq;
@@ -38,7 +39,6 @@ String hostName;
 String serialNumber;
 
 ClimateModel climate;
-DigitalInterruptButton* button;
 unsigned long lastRead;
 unsigned long lastReset;
 unsigned long readInterval;
@@ -190,8 +190,8 @@ void setup(void) {
     states.push_back({ .text = F("Service"),     .value = VICTOR_ACCESSORY_SERVICE_NAME });
     states.push_back({ .text = F("Temperature"), .value = String(temperatureState.value.float_value) + F("°C") });
     states.push_back({ .text = F("Humidity"),    .value = String(humidityState.value.float_value) + F("%") });
-    states.push_back({ .text = F("CO2 Level"),   .value = String(carbonDioxideState.value.float_value) });
-    states.push_back({ .text = F("VOC Density"), .value = String(vocDensityState.value.float_value) });
+    states.push_back({ .text = F("CO2 Level"),   .value = String(carbonDioxideState.value.float_value) + F("ppm/㎥") });
+    states.push_back({ .text = F("VOC Density"), .value = String(vocDensityState.value.float_value) + F("ppb/㎥") });
     states.push_back({ .text = F("Air Quality"), .value = toAirQualityName(airQualityState.value.uint8_value) });
     states.push_back({ .text = F("Paired"),      .value = GlobalHelpers::toYesNoName(homekit_is_paired()) });
     states.push_back({ .text = F("Clients"),     .value = String(arduino_homekit_connected_clients_count()) });
