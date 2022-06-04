@@ -3,6 +3,7 @@
 #include <arduino_homekit_server.h>
 
 #include <AppMain/AppMain.h>
+#include <GlobalHelpers.h>
 #include <I2cStorage/I2cStorage.h>
 #include <Button/DigitalInterruptButton.h>
 
@@ -179,10 +180,7 @@ void measureAQ(bool notify) {
 
 void setup(void) {
   appMain = new AppMain();
-  appMain->setup({
-    .web = true,
-    .radio = false,
-  });
+  appMain->setup();
 
   // setup web
   appMain->webPortal->onServiceGet = [](std::vector<TextValueModel>& states, std::vector<TextValueModel>& buttons) {
