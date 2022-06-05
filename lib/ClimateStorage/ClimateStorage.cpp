@@ -6,7 +6,7 @@ namespace Victor::Components {
     _maxSize = 512;
   }
 
-  void ClimateStorage::_serializeTo(const ClimateModel& model, DynamicJsonDocument& doc) {
+  void ClimateStorage::_serializeTo(const ClimateSetting& model, DynamicJsonDocument& doc) {
     // sensors
     doc[F("hts")] = model.htSensor;
     doc[F("aqs")] = model.aqSensor;
@@ -23,12 +23,12 @@ namespace Victor::Components {
     // baseline
     const JsonObject baselineObj = doc.createNestedObject(F("baseline"));
     baselineObj[F("load")] = model.baseline.load ? 1 : 0;
-    baselineObj[F("store")] = model.baseline.store ? 1 : 0;
+    baselineObj[F("store")] = model.baseline.storeHours;
     baselineObj[F("co2")] = model.baseline.co2;
     baselineObj[F("voc")] = model.baseline.voc;
   }
 
-  void ClimateStorage::_deserializeFrom(ClimateModel& model, const DynamicJsonDocument& doc) {
+  void ClimateStorage::_deserializeFrom(ClimateSetting& model, const DynamicJsonDocument& doc) {
     // sensors
     model.htSensor = doc[F("hts")];
     model.aqSensor = doc[F("aqs")];
@@ -48,7 +48,7 @@ namespace Victor::Components {
     const auto baselineObj = doc[F("baseline")];
     model.baseline = {
       .load = baselineObj[F("load")] == 1,
-      .store = baselineObj[F("store")] == 1,
+      .storeHours = baselineObj[F("store")],
       .co2 = baselineObj[F("co2")],
       .voc = baselineObj[F("voc")],
     };

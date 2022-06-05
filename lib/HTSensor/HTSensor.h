@@ -1,4 +1,3 @@
-
 #ifndef HTSensor_h
 #define HTSensor_h
 

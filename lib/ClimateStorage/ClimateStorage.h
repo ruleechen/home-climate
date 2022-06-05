@@ -24,14 +24,14 @@ namespace Victor::Components {
   };
 
   struct AQBaseline {
-    bool load = true;
-    bool store = true;
-    uint16_t co2 = 0;
-    uint16_t voc = 0;
+    bool load = false;
+    uint8_t storeHours = 0; // 0 ~ 256
+    uint16_t co2 = 0; // 0 ~ 65535
+    uint16_t voc = 0; // 0 ~ 65535
   };
 
-  struct ClimateModel {
-    int8_t buttonPin = -1;
+  struct ClimateSetting {
+    int8_t buttonPin = -1; // -127 ~ 128
     uint8_t buttonTrueValue = 0; // LOW
     HTSensorType htSensor = HTSensorAHT10;
     AQSensorType aqSensor = AQSensorSGP30;
@@ -39,13 +39,13 @@ namespace Victor::Components {
     AQBaseline baseline;
   };
 
-  class ClimateStorage : public FileStorage<ClimateModel> {
+  class ClimateStorage : public FileStorage<ClimateSetting> {
    public:
     ClimateStorage(const char* filePath = "/climate.json");
 
    protected:
-    void _serializeTo(const ClimateModel& model, DynamicJsonDocument& doc) override;
-    void _deserializeFrom(ClimateModel& model, const DynamicJsonDocument& doc) override;
+    void _serializeTo(const ClimateSetting& model, DynamicJsonDocument& doc) override;
+    void _deserializeFrom(ClimateSetting& model, const DynamicJsonDocument& doc) override;
   };
 
   // global

@@ -1,4 +1,3 @@
-
 #include "HTSensor.h"
 
 namespace Victor::Components {

@@ -39,7 +39,7 @@ AQSensor* aq;
 String hostName;
 String serialNumber;
 
-ClimateModel climate;
+ClimateSetting climate;
 unsigned long lastRead;
 unsigned long lastReset;
 unsigned long readInterval;
@@ -262,7 +262,7 @@ void setup(void) {
   }
   if (climate.aqSensor != AQSensorOFF) {
     aq = new AQSensor(climate.aqSensor);
-    if (!aq->begin()) {
+    if (!aq->begin(climate.baseline, i2c.loopSeconds)) {
       console.error()
         .bracket(F("aq"))
         .section(F("notfound"));

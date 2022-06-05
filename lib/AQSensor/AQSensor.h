@@ -1,4 +1,3 @@
-
 #ifndef AQSensor_h
 #define AQSensor_h
 
@@ -10,7 +9,7 @@ namespace Victor::Components {
   class AQSensor {
    public:
     AQSensor(AQSensorType type);
-    bool begin();
+    bool begin(AQBaseline baseline, uint8_t loopSeconds);
     void reset();
     void setRelHumidity(float temperature, float humidity);
     bool measure();
@@ -19,7 +18,8 @@ namespace Victor::Components {
 
    private:
     Adafruit_SGP30* _sgp30 = nullptr;
-    uint8_t _measureCount = 0;
+    uint16_t _storeCount = 0;
+    uint16_t _measureCount = 0;
   };
 
 } // namespace Victor::Components
