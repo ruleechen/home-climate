@@ -12,12 +12,13 @@ namespace Victor::Components {
   }
 
   bool HTSensor::begin() {
+    auto found = false;
     if (_aht10 != nullptr) {
-      return _aht10->begin();
+      found = _aht10->begin();
     } else if (_sht30 != nullptr) {
-      return _sht30->begin();
+      found = _sht30->begin();
     }
-    return false;
+    return found;
   }
 
   void HTSensor::reset() {

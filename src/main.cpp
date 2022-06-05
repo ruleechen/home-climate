@@ -221,8 +221,7 @@ void setup(void) {
   arduino_homekit_setup(&serverConfig);
 
   // climate
-  const auto climateStorage = new ClimateStorage("/climate.json");
-  climate = climateStorage->load();
+  climate = climateStorage.load();
   if (climate.buttonPin > -1) {
     button = new DigitalInterruptButton(climate.buttonPin, climate.buttonTrueValue);
     button->onAction = [](const ButtonAction action) {

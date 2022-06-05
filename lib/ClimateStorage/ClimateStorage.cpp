@@ -3,7 +3,7 @@
 namespace Victor::Components {
 
   ClimateStorage::ClimateStorage(const char* filePath) : FileStorage(filePath) {
-    _maxSize = 256;
+    _maxSize = 512;
   }
 
   void ClimateStorage::_serializeTo(const ClimateModel& model, DynamicJsonDocument& doc) {
@@ -20,6 +20,12 @@ namespace Victor::Components {
     reviseObj[F("t")] = model.revise.temperature;
     reviseObj[F("co2")] = model.revise.co2;
     reviseObj[F("voc")] = model.revise.voc;
+    // baseline
+    const JsonObject baselineObj = doc.createNestedObject(F("baseline"));
+    baselineObj[F("load")] = model.baseline.load ? 1 : 0;
+    baselineObj[F("store")] = model.baseline.store ? 1 : 0;
+    baselineObj[F("co2")] = model.baseline.co2;
+    baselineObj[F("voc")] = model.baseline.voc;
   }
 
   void ClimateStorage::_deserializeFrom(ClimateModel& model, const DynamicJsonDocument& doc) {
@@ -38,6 +44,17 @@ namespace Victor::Components {
       .co2 = reviseObj[F("co2")],
       .voc = reviseObj[F("voc")],
     };
+    // baseline
+    const auto baselineObj = doc[F("baseline")];
+    model.baseline = {
+      .load = baselineObj[F("load")] == 1,
+      .store = baselineObj[F("store")] == 1,
+      .co2 = baselineObj[F("co2")],
+      .voc = baselineObj[F("voc")],
+    };
   }
+
+  // global
+  ClimateStorage climateStorage;
 
 } // namespace Victor::Components

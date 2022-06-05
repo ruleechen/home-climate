@@ -17,10 +17,17 @@ namespace Victor::Components {
   };
 
   struct ReviseConfig {
-    float humidity;
-    float temperature;
-    float co2;
-    float voc;
+    float humidity = 0;
+    float temperature = 0;
+    float co2 = 0;
+    float voc = 0;
+  };
+
+  struct AQBaseline {
+    bool load = true;
+    bool store = true;
+    uint16_t co2 = 0;
+    uint16_t voc = 0;
   };
 
   struct ClimateModel {
@@ -29,16 +36,20 @@ namespace Victor::Components {
     HTSensorType htSensor = HTSensorAHT10;
     AQSensorType aqSensor = AQSensorSGP30;
     ReviseConfig revise;
+    AQBaseline baseline;
   };
 
   class ClimateStorage : public FileStorage<ClimateModel> {
    public:
-    ClimateStorage(const char* filePath);
+    ClimateStorage(const char* filePath = "/climate.json");
 
    protected:
     void _serializeTo(const ClimateModel& model, DynamicJsonDocument& doc) override;
     void _deserializeFrom(ClimateModel& model, const DynamicJsonDocument& doc) override;
   };
+
+  // global
+  extern ClimateStorage climateStorage;
 
 } // namespace Victor::Components
 
