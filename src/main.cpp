@@ -246,8 +246,8 @@ void setup(void) {
   // setup sensor
   const auto i2cStorage = new I2cStorage("/i2c.json");
   const auto i2c = i2cStorage->load();
-  readInterval = (i2c.loopSeconds > 0 ? i2c.loopSeconds : 10) * 1000;
-  resetInterval = (i2c.resetHours > 0 ? i2c.resetHours : 24) * 60 * 60 * 1000;
+  readInterval = i2c.loopSeconds * 1000;
+  resetInterval = i2c.resetHours * 60 * 60 * 1000;
   Wire.begin(   // https://zhuanlan.zhihu.com/p/137568249
     i2c.sdaPin, // Inter-Integrated Circuit - Serial Data (I2C-SDA)
     i2c.sclPin  // Inter-Integrated Circuit - Serial Clock (I2C-SCL)
@@ -284,7 +284,10 @@ void loop(void) {
   const auto lightSleep = victorWifi.isLightSleepMode() && isPaired;
   // loop sensor
   const auto now = millis();
-  if (now - lastRead > readInterval) {
+  if (
+    readInterval > 0 &&
+    now - lastRead > readInterval
+  ) {
     lastRead = now;
     if (!lightSleep) {
       builtinLed.turnOn();
@@ -301,7 +304,10 @@ void loop(void) {
     }
   }
   // reset sensor
-  if (now - lastReset > resetInterval) {
+  if (
+    resetInterval > 0 &&
+    now - lastReset > resetInterval
+  ) {
     lastReset = now;
     if (ht) {
       ht->reset();
