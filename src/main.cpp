@@ -255,18 +255,18 @@ void setup(void) {
   );
   if (climate.htSensor != HTSensorOFF) {
     ht = new HTSensor(climate.htSensor);
-    if (ht->begin()) {
-      console.log()
+    if (!ht->begin()) {
+      console.error()
         .bracket(F("ht"))
-        .section(F("begin"));
+        .section(F("notfound"));
     }
   }
   if (climate.aqSensor != AQSensorOFF) {
     aq = new AQSensor(climate.aqSensor);
-    if (aq->begin()) {
-      console.log()
+    if (!aq->begin()) {
+      console.error()
         .bracket(F("aq"))
-        .section(F("begin"));
+        .section(F("notfound"));
     }
   }
 
@@ -281,10 +281,8 @@ void loop(void) {
   if (button) {
     button->loop();
   }
-  const auto lightSleep = (
-    victorWifi.isLightSleepMode() &&
-    arduino_homekit_get_running_server()->paired
-  );
+  const auto isPaired = arduino_homekit_get_running_server()->paired;
+  const auto lightSleep = victorWifi.isLightSleepMode() && isPaired;
   // loop sensor
   const auto now = millis();
   if (now - lastRead > readInterval) {
@@ -292,13 +290,12 @@ void loop(void) {
     if (!lightSleep) {
       builtinLed.turnOn();
     }
-    const auto notify = homekit_is_paired();
     ESP.wdtFeed();
     if (ht) {
-      measureHT(notify);
+      measureHT(isPaired);
     }
     if (aq) {
-      measureAQ(notify);
+      measureAQ(isPaired);
     }
     if (!lightSleep) {
       builtinLed.turnOff();
