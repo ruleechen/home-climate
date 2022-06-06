@@ -262,7 +262,7 @@ void setup(void) {
   }
   if (climate.aqSensor != AQSensorOFF) {
     aq = new AQSensor(climate.aqSensor);
-    if (!aq->begin(climate.baseline, i2c.loopSeconds)) {
+    if (!aq->begin(climate.baseline)) {
       console.error()
         .bracket(F("aq"))
         .section(F("notfound"));

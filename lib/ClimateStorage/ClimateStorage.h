@@ -25,14 +25,14 @@ namespace Victor::Components {
 
   struct AQBaseline {
     bool load = false;
-    uint8_t storeHours = 0; // 0 ~ 256
-    uint16_t co2 = 0; // 0 ~ 65535
-    uint16_t voc = 0; // 0 ~ 65535
+    uint8_t storeHours = 0; // (0 ~ 256)
+    uint16_t co2 = 0; // (0 ~ 65535)
+    uint16_t voc = 0; // (0 ~ 65535)
   };
 
   struct ClimateSetting {
-    int8_t buttonPin = -1; // -127 ~ 128
-    uint8_t buttonTrueValue = 0; // LOW
+    int8_t buttonPin = -1; // (-127 ~ 128)
+    uint8_t buttonTrueValue = 0; // (0 ~ 256) LOW
     HTSensorType htSensor = HTSensorAHT10;
     AQSensorType aqSensor = AQSensorSGP30;
     ReviseConfig revise;

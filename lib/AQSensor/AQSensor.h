@@ -9,7 +9,7 @@ namespace Victor::Components {
   class AQSensor {
    public:
     AQSensor(AQSensorType type);
-    bool begin(AQBaseline baseline, uint8_t loopSeconds);
+    bool begin(AQBaseline baseline);
     void reset();
     void setRelHumidity(float temperature, float humidity);
     bool measure();
@@ -18,8 +18,8 @@ namespace Victor::Components {
 
    private:
     Adafruit_SGP30* _sgp30 = nullptr;
-    uint16_t _storeCount = 0;
-    uint16_t _measureCount = 0;
+    unsigned long _storeInterval = 0;
+    unsigned long _storeTimestamp = 0;
   };
 
 } // namespace Victor::Components
