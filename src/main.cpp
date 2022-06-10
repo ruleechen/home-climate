@@ -41,49 +41,49 @@ String hostName;
 String serialNumber;
 
 enum AirQuality {
-  AirQualityUnknown = 0,
-  AirQualityExcellent = 1,
-  AirQualityGood = 2,
-  AirQualityFair = 3,
-  AirQualityInferior = 4,
-  AirQualityPoor = 5,
+  AIR_QUALITY_UNKNOWN = 0,
+  AIR_QUALITY_EXCELLENT = 1,
+  AIR_QUALITY_GOOD = 2,
+  AIR_QUALITY_FAIR = 3,
+  AIR_QUALITY_INFERIOR = 4,
+  AIR_QUALITY_POOR = 5,
 };
 
 String toAirQualityName(uint8_t state) {
   return (
-    state == AirQualityExcellent ? F("Excellent") :
-    state == AirQualityGood      ? F("Good") :
-    state == AirQualityFair      ? F("Fair") :
-    state == AirQualityInferior  ? F("Inferior") :
-    state == AirQualityPoor      ? F("Poor") : F("Unknown")
+    state == AIR_QUALITY_EXCELLENT ? F("Excellent") :
+    state == AIR_QUALITY_GOOD      ? F("Good") :
+    state == AIR_QUALITY_FAIR      ? F("Fair") :
+    state == AIR_QUALITY_INFERIOR  ? F("Inferior") :
+    state == AIR_QUALITY_POOR      ? F("Poor") : F("Unknown")
   );
 }
 
 AirQuality toAirQuality(float value) {
   // 0 ~ 49
   if (value < 49) {
-    return AirQualityExcellent;
+    return AIR_QUALITY_EXCELLENT;
   }
   // 50 ~ 99
   if (value < 99) {
-    return AirQualityGood;
+    return AIR_QUALITY_GOOD;
   }
   // 100 ~ 299
   if (value < 399) {
-    return AirQualityFair;
+    return AIR_QUALITY_FAIR;
   }
   // 300 ~ 599
   if (value < 599) {
-    return AirQualityInferior;
+    return AIR_QUALITY_INFERIOR;
   }
   // 600 ~ 1000
-  return AirQualityPoor;
+  return AIR_QUALITY_POOR;
 }
 
 void measureHT(bool isPaired, bool lightSleep) {
   const auto state = ht->measure();
-  if (state == MeasureSkipped) { return; }
-  const auto htOk = state == MeasureSuccess;
+  if (state == MEASURE_SKIPPED) { return; }
+  const auto htOk = state == MEASURE_SUCCESS;
   if (temperatureActiveState.value.bool_value != htOk) {
     temperatureActiveState.value.bool_value = htOk;
     if (isPaired) {
@@ -132,8 +132,8 @@ void measureHT(bool isPaired, bool lightSleep) {
 
 void measureAQ(bool isPaired, bool lightSleep) {
   const auto state = aq->measure();
-  if (state == MeasureSkipped) { return; }
-  const auto aqOk = state == MeasureSuccess;
+  if (state == MEASURE_SKIPPED) { return; }
+  const auto aqOk = state == MEASURE_SUCCESS;
   if (airQualityActiveState.value.bool_value != aqOk) {
     airQualityActiveState.value.bool_value = aqOk;
     if (isPaired) {
@@ -249,7 +249,7 @@ void setup(void) {
     i2c.sdaPin, // Inter-Integrated Circuit - Serial Data (I2C-SDA)
     i2c.sclPin  // Inter-Integrated Circuit - Serial Clock (I2C-SCL)
   );
-  if (climate.htSensor != HTSensorOFF) {
+  if (climate.htSensor != HT_SENSOR_OFF) {
     ht = new HTSensor(climate.htSensor, climate.htQuery);
     if (!ht->begin()) {
       console.error()
@@ -257,7 +257,7 @@ void setup(void) {
         .section(F("notfound"));
     }
   }
-  if (climate.aqSensor != AQSensorOFF) {
+  if (climate.aqSensor != AQ_SENSOR_OFF) {
     aq = new AQSensor(climate.aqSensor, climate.aqQuery);
     if (!aq->begin(climate.baseline)) {
       console.error()

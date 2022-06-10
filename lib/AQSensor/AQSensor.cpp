@@ -43,11 +43,11 @@ namespace Victor::Components {
 
   MeasureState AQSensor::measure() {
     if (_measureInterval == nullptr || !_measureInterval->isOver()) {
-      return MeasureSkipped;
+      return MEASURE_SKIPPED;
     }
     if (_resetInterval != nullptr && _resetInterval->isOver()) {
       reset();
-      return MeasureSkipped;
+      return MEASURE_SKIPPED;
     }
     const auto readSuccess = _sgp30->measureAirQuality() == SGP30_SUCCESS;
     if (
@@ -67,7 +67,7 @@ namespace Victor::Components {
           .section(F("voc"), String(_sgp30->baselineTVOC));
       }
     }
-    return readSuccess ? MeasureSuccess : MeasureFailed;
+    return readSuccess ? MEASURE_SUCCESS : MEASURE_FAILED;
   }
 
   float AQSensor::getCO2() {

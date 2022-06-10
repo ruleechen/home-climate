@@ -6,20 +6,20 @@
 namespace Victor::Components {
 
   enum MeasureState {
-    MeasureFailed = 0,
-    MeasureSuccess = 1,
-    MeasureSkipped = 2,
+    MEASURE_FAILED = 0,
+    MEASURE_SUCCESS = 1,
+    MEASURE_SKIPPED = 2,
   };
 
   enum HTSensorType {
-    HTSensorOFF = 0,
-    HTSensorAHT10 = 1,
-    HTSensorSHT30 = 2,
+    HT_SENSOR_OFF = 0,
+    HT_SENSOR_AHT10 = 1,
+    HT_SENSOR_SHT30 = 2,
   };
 
   enum AQSensorType {
-    AQSensorOFF = 0,
-    AQSensorSGP30 = 1,
+    AQ_SENSOR_OFF = 0,
+    AQ_SENSOR_SGP30 = 1,
   };
 
   struct QueryConfig {
@@ -44,8 +44,8 @@ namespace Victor::Components {
   struct ClimateSetting {
     int8_t buttonPin = -1; // (-127 ~ 128)
     uint8_t buttonTrueValue = 0; // (0 ~ 256) LOW
-    HTSensorType htSensor = HTSensorAHT10;
-    AQSensorType aqSensor = AQSensorSGP30;
+    HTSensorType htSensor = HT_SENSOR_AHT10;
+    AQSensorType aqSensor = AQ_SENSOR_SGP30;
     QueryConfig htQuery;
     QueryConfig aqQuery;
     ReviseConfig revise;
