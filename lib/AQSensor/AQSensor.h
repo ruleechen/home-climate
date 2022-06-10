@@ -1,7 +1,7 @@
 #ifndef AQSensor_h
 #define AQSensor_h
 
-#include <Adafruit_SGP30.h>
+#include <SparkFun_SGP30_Arduino_Library.h>
 #include "ClimateStorage.h"
 
 namespace Victor::Components {
@@ -11,13 +11,15 @@ namespace Victor::Components {
     AQSensor(AQSensorType type);
     bool begin(AQBaseline baseline);
     void reset();
-    void setRelHumidity(float temperature, float humidity);
+    void setRelHumidity(float relHumidity, float temperature);
     bool measure();
     float getCO2();
     float getTVOC();
+    static double getAbsoluteHumidity(float relativeHumidity, float temperature);
+    static uint16_t doubleToFixedPoint(double number);
 
    private:
-    Adafruit_SGP30* _sgp30 = nullptr;
+    SGP30* _sgp30 = nullptr;
     unsigned long _storeInterval = 0;
     unsigned long _storeTimestamp = 0;
   };

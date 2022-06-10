@@ -40,10 +40,10 @@ String hostName;
 String serialNumber;
 
 ClimateSetting climate;
-unsigned long lastRead;
-unsigned long lastReset;
-unsigned long readInterval;
-unsigned long resetInterval;
+unsigned long lastRead = 0;
+unsigned long lastReset = 0;
+unsigned long readInterval = 0;
+unsigned long resetInterval = 0;
 
 enum AirQuality {
   AirQualityUnknown = 0,
@@ -128,7 +128,7 @@ void measureHT(bool notify) {
       .section(F("t"), String(temperature));
     // write to AQ
     if (aq) {
-      aq->setRelHumidity(temperature, humidity);
+      aq->setRelHumidity(humidity, temperature);
     }
   }
 }
