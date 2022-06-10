@@ -2,11 +2,17 @@
 
 namespace Victor::Components {
 
-  HTSensor::HTSensor(HTSensorType type) {
+  HTSensor::HTSensor(HTSensorType type, QueryConfig query) {
     if (type == HTSensorAHT10) {
       _aht10 = new AHT10();
     } else if (type == HTSensorSHT30) {
       _sht30 = new SHT31();
+    }
+    if (query.loopSeconds > 0) {
+      _measureInterval = new IntervalOver(query.loopSeconds * 1000);
+    }
+    if (query.resetHours > 0) {
+      _resetInterval = new IntervalOver(query.resetHours * 60 * 60 * 1000);
     }
   }
 
@@ -28,13 +34,21 @@ namespace Victor::Components {
     }
   }
 
-  bool HTSensor::read() {
-    if (_aht10 != nullptr) {
-      return _aht10->readRawData() != AHT10_ERROR;
-    } else if (_sht30 != nullptr) {
-      return _sht30->read();
+  MeasureState HTSensor::measure() {
+    if (_measureInterval == nullptr || !_measureInterval->isOver()) {
+      return MeasureSkipped;
     }
-    return false;
+    if (_resetInterval != nullptr && _resetInterval->isOver()) {
+      reset();
+      return MeasureSkipped;
+    }
+    auto readSuccess = false;
+    if (_aht10 != nullptr) {
+      readSuccess = _aht10->readRawData() != AHT10_ERROR;
+    } else if (_sht30 != nullptr) {
+      readSuccess = _sht30->read();
+    }
+    return readSuccess ? MeasureSuccess : MeasureFailed;
   }
 
   float HTSensor::getHumidity() {

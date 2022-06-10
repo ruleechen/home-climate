@@ -2,13 +2,20 @@
 
 namespace Victor::Components {
 
-  AQSensor::AQSensor(AQSensorType type) {
+  AQSensor::AQSensor(AQSensorType type, QueryConfig query) {
     _sgp30 = new SGP30();
+    if (query.loopSeconds > 0) {
+      _measureInterval = new IntervalOver(query.loopSeconds * 1000);
+    }
+    if (query.resetHours > 0) {
+      _resetInterval = new IntervalOver(query.resetHours * 60 * 60 * 1000);
+    }
   }
 
   bool AQSensor::begin(AQBaseline baseline) {
-    _storeInterval = baseline.storeHours * 60 * 60 * 1000;
-    _storeTimestamp = millis();
+    if (baseline.storeHours > 0) {
+      _storeInterval = new IntervalOver(baseline.storeHours * 60 * 60 * 1000);
+    }
     const auto found = _sgp30->begin();
     if (found) {
       _sgp30->initAirQuality();
@@ -34,21 +41,21 @@ namespace Victor::Components {
     _sgp30->generalCallReset();
   }
 
-  void AQSensor::setRelHumidity(float relHumidity, float temperature) {
-    auto absHumidity = getAbsoluteHumidity(relHumidity, temperature);
-    auto sensHumidity = doubleToFixedPoint(absHumidity);
-    _sgp30->setHumidity(sensHumidity);
-  }
-
-  bool AQSensor::measure() {
+  MeasureState AQSensor::measure() {
+    if (_measureInterval == nullptr || !_measureInterval->isOver()) {
+      return MeasureSkipped;
+    }
+    if (_resetInterval != nullptr && _resetInterval->isOver()) {
+      reset();
+      return MeasureSkipped;
+    }
     const auto readSuccess = _sgp30->measureAirQuality() == SGP30_SUCCESS;
-    if (readSuccess && _storeInterval > 0) {
-      const auto now = millis();
-      if (
-        now - _storeTimestamp >= _storeInterval &&
-        _sgp30->getBaseline() == SGP30_SUCCESS
-      ) {
-        _storeTimestamp = now;
+    if (
+      readSuccess &&
+      _storeInterval != nullptr &&
+      _storeInterval->isOver()
+    ) {
+      if (_sgp30->getBaseline() == SGP30_SUCCESS) {
         auto setting = climateStorage.load();
         setting.baseline.load = true; // once we have baseline generated, enable load for next boot
         setting.baseline.co2 = _sgp30->baselineCO2;
@@ -60,7 +67,7 @@ namespace Victor::Components {
           .section(F("voc"), String(_sgp30->baselineTVOC));
       }
     }
-    return readSuccess;
+    return readSuccess ? MeasureSuccess : MeasureFailed;
   }
 
   float AQSensor::getCO2() {
@@ -69,6 +76,12 @@ namespace Victor::Components {
 
   float AQSensor::getTVOC() {
     return _sgp30->TVOC;
+  }
+
+  void AQSensor::setRelHumidity(float relHumidity, float temperature) {
+    auto absHumidity = getAbsoluteHumidity(relHumidity, temperature);
+    auto sensHumidity = doubleToFixedPoint(absHumidity);
+    _sgp30->setHumidity(sensHumidity);
   }
 
   double AQSensor::getAbsoluteHumidity(float relativeHumidity, float temperature) {

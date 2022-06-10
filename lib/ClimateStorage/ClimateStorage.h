@@ -5,6 +5,12 @@
 
 namespace Victor::Components {
 
+  enum MeasureState {
+    MeasureFailed = 0,
+    MeasureSuccess = 1,
+    MeasureSkipped = 2,
+  };
+
   enum HTSensorType {
     HTSensorOFF = 0,
     HTSensorAHT10 = 1,
@@ -14,6 +20,11 @@ namespace Victor::Components {
   enum AQSensorType {
     AQSensorOFF = 0,
     AQSensorSGP30 = 1,
+  };
+
+  struct QueryConfig {
+    uint8_t loopSeconds = 0; // (0 ~ 256) How many seconds to read devices on i2c bus.
+    uint8_t resetHours = 0;  // (0 ~ 256) How many hours to soft reset devices on i2c bus.
   };
 
   struct ReviseConfig {
@@ -35,6 +46,8 @@ namespace Victor::Components {
     uint8_t buttonTrueValue = 0; // (0 ~ 256) LOW
     HTSensorType htSensor = HTSensorAHT10;
     AQSensorType aqSensor = AQSensorSGP30;
+    QueryConfig htQuery;
+    QueryConfig aqQuery;
     ReviseConfig revise;
     AQBaseline baseline;
   };

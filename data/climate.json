@@ -1,1 +1,1 @@
-{"hts":2,"aqs":1,"button":[0,0],"revise":{"h":20,"t":-6,"co2":0,"voc":0},"baseline":{"load":0,"store":12,"co2":36897,"voc":38836}}
+{"hts":2,"aqs":1,"button":[0,0],"ht":{"loop":5,"reset":0},"aq":{"loop":1,"reset":0},"revise":{"h":20,"t":-6,"co2":0,"voc":0},"baseline":{"load":0,"store":12,"co2":36897,"voc":38836}}
