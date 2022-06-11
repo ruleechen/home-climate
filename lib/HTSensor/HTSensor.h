@@ -3,7 +3,7 @@
 
 #include <AHT10.h>
 #include <SHT31.h>
-#include <IntervalOver.h>
+#include <Timer/IntervalOverAuto.h>
 #include "ClimateStorage.h"
 
 namespace Victor::Components {
@@ -18,8 +18,8 @@ namespace Victor::Components {
     float getTemperature();
 
    private:
-    IntervalOver* _measureInterval = nullptr;
-    IntervalOver* _resetInterval = nullptr;
+    IntervalOverAuto* _measureInterval = nullptr;
+    IntervalOverAuto* _resetInterval = nullptr;
     AHT10* _aht10 = nullptr;
     SHT31* _sht30 = nullptr;
   };

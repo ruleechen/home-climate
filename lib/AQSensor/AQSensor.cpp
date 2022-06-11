@@ -5,10 +5,10 @@ namespace Victor::Components {
   AQSensor::AQSensor(AQSensorType type, QueryConfig query) {
     _sgp30 = new SGP30();
     if (query.loopSeconds > 0) {
-      _measureInterval = new IntervalOver(query.loopSeconds * 1000);
+      _measureInterval = new IntervalOverAuto(query.loopSeconds * 1000);
     }
     if (query.resetHours > 0) {
-      _resetInterval = new IntervalOver(query.resetHours * 60 * 60 * 1000);
+      _resetInterval = new IntervalOverAuto(query.resetHours * 60 * 60 * 1000);
     }
   }
 
@@ -42,10 +42,11 @@ namespace Victor::Components {
   }
 
   MeasureState AQSensor::measure() {
-    if (_measureInterval == nullptr || !_measureInterval->isOver()) {
+    const auto now = millis();
+    if (_measureInterval == nullptr || !_measureInterval->isOver(now)) {
       return MEASURE_SKIPPED;
     }
-    if (_resetInterval != nullptr && _resetInterval->isOver()) {
+    if (_resetInterval != nullptr && _resetInterval->isOver(now)) {
       reset();
       return MEASURE_SKIPPED;
     }
@@ -53,9 +54,10 @@ namespace Victor::Components {
     if (
       readSuccess &&
       _storeInterval != nullptr &&
-      _storeInterval->isOver()
+      _storeInterval->isOver(now)
     ) {
       if (_sgp30->getBaseline() == SGP30_SUCCESS) {
+        _storeInterval->start(now);
         auto setting = climateStorage.load();
         setting.baseline.load = true; // once we have baseline generated, enable load for next boot
         setting.baseline.co2 = _sgp30->baselineCO2;

@@ -41,12 +41,12 @@ String hostName;
 String serialNumber;
 
 enum AirQuality {
-  AIR_QUALITY_UNKNOWN = 0,
+  AIR_QUALITY_UNKNOWN   = 0,
   AIR_QUALITY_EXCELLENT = 1,
-  AIR_QUALITY_GOOD = 2,
-  AIR_QUALITY_FAIR = 3,
-  AIR_QUALITY_INFERIOR = 4,
-  AIR_QUALITY_POOR = 5,
+  AIR_QUALITY_GOOD      = 2,
+  AIR_QUALITY_FAIR      = 3,
+  AIR_QUALITY_INFERIOR  = 4,
+  AIR_QUALITY_POOR      = 5,
 };
 
 String toAirQualityName(uint8_t state) {
@@ -195,10 +195,10 @@ void setup(void) {
     // buttons
     buttons.push_back({ .text = F("UnPair"),   .value = F("UnPair") }); // UnPair HomeKit
     if (ht) {
-      buttons.push_back({ .text = F("Reset HT"), .value = F("ht") });  // Humidity/Temperature
+      buttons.push_back({ .text = F("Reset HT"), .value = F("ht") });  // Reset Humidity/Temperature
     }
     if (aq) {
-      buttons.push_back({ .text = F("Reset AQ"), .value = F("aq") });  // Air Quality
+      buttons.push_back({ .text = F("Reset AQ"), .value = F("aq") });  // Reset Air Quality
     }
   };
   appMain->webPortal->onServicePost = [](const String& value) {
@@ -227,15 +227,15 @@ void setup(void) {
       console.log()
         .bracket(F("button"))
         .section(F("action"), String(action));
-      if (action == ButtonActionPressed) {
+      if (action == BUTTON_ACTION_PRESSED) {
         builtinLed.flash();
-      } else if (action == ButtonActionDoublePressed) {
+      } else if (action == BUTTON_ACTION_DOUBLE_PRESSED) {
         builtinLed.flash(500);
         const auto enable = victorWifi.isLightSleepMode();
         victorWifi.enableAP(enable); // toggle enabling ap
-      } else if (action == ButtonActionRestart) {
+      } else if (action == BUTTON_ACTION_RESTART) {
         ESP.restart();
-      } else if (action == ButtonActionRestore) {
+      } else if (action == BUTTON_ACTION_RESTORE) {
         homekit_server_reset();
         ESP.restart();
       }

@@ -9,10 +9,10 @@ namespace Victor::Components {
       _sht30 = new SHT31();
     }
     if (query.loopSeconds > 0) {
-      _measureInterval = new IntervalOver(query.loopSeconds * 1000);
+      _measureInterval = new IntervalOverAuto(query.loopSeconds * 1000);
     }
     if (query.resetHours > 0) {
-      _resetInterval = new IntervalOver(query.resetHours * 60 * 60 * 1000);
+      _resetInterval = new IntervalOverAuto(query.resetHours * 60 * 60 * 1000);
     }
   }
 
@@ -35,10 +35,11 @@ namespace Victor::Components {
   }
 
   MeasureState HTSensor::measure() {
-    if (_measureInterval == nullptr || !_measureInterval->isOver()) {
+    const auto now = millis();
+    if (_measureInterval == nullptr || !_measureInterval->isOver(now)) {
       return MEASURE_SKIPPED;
     }
-    if (_resetInterval != nullptr && _resetInterval->isOver()) {
+    if (_resetInterval != nullptr && _resetInterval->isOver(now)) {
       reset();
       return MEASURE_SKIPPED;
     }
