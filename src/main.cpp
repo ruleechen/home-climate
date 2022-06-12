@@ -242,13 +242,23 @@ void setup(void) {
     };
   }
 
-  // setup sensor
+  // setup i2c
   const auto i2cStorage = new I2cStorage("/i2c.json");
   const auto i2c = i2cStorage->load();
+  if (i2c.enablePin > -1) {
+    const auto enableI2c = new DigitalOutput(i2c.enablePin, i2c.enableTrueValue);
+    enableI2c->setValue(false);
+    delay(200);
+    enableI2c->setValue(true);
+    delay(200);
+    delete enableI2c;
+  }
   Wire.begin(   // https://zhuanlan.zhihu.com/p/137568249
     i2c.sdaPin, // Inter-Integrated Circuit - Serial Data (I2C-SDA)
     i2c.sclPin  // Inter-Integrated Circuit - Serial Clock (I2C-SCL)
   );
+
+  // setup ht sensor
   if (climate.htSensor != HT_SENSOR_OFF) {
     ht = new HTSensor(climate.htSensor, climate.htQuery);
     if (!ht->begin()) {
@@ -257,6 +267,8 @@ void setup(void) {
         .section(F("notfound"));
     }
   }
+
+  // setup aq sensor
   if (climate.aqSensor != AQ_SENSOR_OFF) {
     aq = new AQSensor(climate.aqSensor, climate.aqQuery);
     if (!aq->begin(climate.baseline)) {
