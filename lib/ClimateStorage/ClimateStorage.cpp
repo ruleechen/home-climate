@@ -15,13 +15,13 @@ namespace Victor::Components {
     buttonArr[0] = model.buttonPin;
     buttonArr[1] = model.buttonTrueValue;
     // ht query
-    const JsonObject htQueryObj = doc.createNestedObject(F("ht"));
-    htQueryObj[F("loop")] = model.htQuery.loopSeconds;
-    htQueryObj[F("reset")] = model.htQuery.resetHours;
+    const JsonObject htObj = doc.createNestedObject(F("ht"));
+    htObj[F("loop")] = model.htQuery.loopSeconds;
+    htObj[F("reset")] = model.htQuery.resetHours;
     // aq query
-    const JsonObject aqQueryObj = doc.createNestedObject(F("aq"));
-    aqQueryObj[F("loop")] = model.aqQuery.loopSeconds;
-    aqQueryObj[F("reset")] = model.aqQuery.resetHours;
+    const JsonObject aqObj = doc.createNestedObject(F("aq"));
+    aqObj[F("loop")] = model.aqQuery.loopSeconds;
+    aqObj[F("reset")] = model.aqQuery.resetHours;
     // revise
     const JsonObject reviseObj = doc.createNestedObject(F("revise"));
     reviseObj[F("h")] = model.revise.humidity;
@@ -45,13 +45,17 @@ namespace Victor::Components {
     model.buttonPin = buttonArr[0];
     model.buttonTrueValue = buttonArr[1];
     // ht query
-    const auto htQueryObj = doc[F("ht")];
-    model.htQuery.loopSeconds = htQueryObj[F("loop")];
-    model.htQuery.resetHours = htQueryObj[F("reset")];
+    const auto htObj = doc[F("ht")];
+    model.htQuery = {
+      .loopSeconds = htObj[F("loop")],
+      .resetHours = htObj[F("reset")],
+    };
     // aq query
-    const auto aqQueryObj = doc[F("aq")];
-    model.aqQuery.loopSeconds = aqQueryObj[F("loop")];
-    model.aqQuery.resetHours = aqQueryObj[F("reset")];
+    const auto aqObj = doc[F("aq")];
+    model.aqQuery = {
+      .loopSeconds = aqObj[F("loop")],
+      .resetHours = aqObj[F("reset")],
+    };
     // revise
     const auto reviseObj = doc[F("revise")];
     model.revise = {
