@@ -49,7 +49,7 @@ enum AirQuality {
   AIR_QUALITY_POOR      = 5,
 };
 
-String toAirQualityName(uint8_t state) {
+String toAirQualityName(const uint8_t state) {
   return (
     state == AIR_QUALITY_EXCELLENT ? F("Excellent") :
     state == AIR_QUALITY_GOOD      ? F("Good") :
@@ -59,7 +59,7 @@ String toAirQualityName(uint8_t state) {
   );
 }
 
-AirQuality toAirQuality(float value) {
+AirQuality toAirQuality(const float value) {
   // 0 ~ 49
   if (value < 49) {
     return AIR_QUALITY_EXCELLENT;
@@ -80,19 +80,19 @@ AirQuality toAirQuality(float value) {
   return AIR_QUALITY_POOR;
 }
 
-void measureHT(bool isPaired, bool lightSleep) {
+void measureHT(const bool notify) {
   const auto state = ht->measure();
   if (state == MEASURE_SKIPPED) { return; }
   const auto htOk = state == MEASURE_SUCCESS;
   if (temperatureActiveState.value.bool_value != htOk) {
     temperatureActiveState.value.bool_value = htOk;
-    if (isPaired) {
+    if (notify) {
       homekit_characteristic_notify(&temperatureActiveState, temperatureActiveState.value);
     }
   }
   if (humidityActiveState.value.bool_value != htOk) {
     humidityActiveState.value.bool_value = htOk;
-    if (isPaired) {
+    if (notify) {
       homekit_characteristic_notify(&humidityActiveState, humidityActiveState.value);
     }
   }
@@ -103,7 +103,7 @@ void measureHT(bool isPaired, bool lightSleep) {
       const auto temperatureFix = std::max<float>(0, std::min<float>(100, temperature)); // 0~100
       if (temperatureState.value.float_value != temperatureFix) {
         temperatureState.value.float_value = temperatureFix;
-        if (isPaired) {
+        if (notify) {
           homekit_characteristic_notify(&temperatureState, temperatureState.value);
         }
       }
@@ -114,7 +114,7 @@ void measureHT(bool isPaired, bool lightSleep) {
       const auto humidityFix = std::max<float>(0, std::min<float>(100, humidity)); // 0~100
       if (humidityState.value.float_value != humidityFix) {
         humidityState.value.float_value = humidityFix;
-        if (isPaired) {
+        if (notify) {
           homekit_characteristic_notify(&humidityState, humidityState.value);
         }
       }
@@ -130,13 +130,13 @@ void measureHT(bool isPaired, bool lightSleep) {
   }
 }
 
-void measureAQ(bool isPaired, bool lightSleep) {
+void measureAQ(const bool notify) {
   const auto state = aq->measure();
   if (state == MEASURE_SKIPPED) { return; }
   const auto aqOk = state == MEASURE_SUCCESS;
   if (airQualityActiveState.value.bool_value != aqOk) {
     airQualityActiveState.value.bool_value = aqOk;
-    if (isPaired) {
+    if (notify) {
       homekit_characteristic_notify(&airQualityActiveState, airQualityActiveState.value);
     }
   }
@@ -147,7 +147,7 @@ void measureAQ(bool isPaired, bool lightSleep) {
       const auto co2Fix = std::max<float>(0, std::min<float>(100000, co2)); // 0~100000
       if (carbonDioxideState.value.float_value != co2Fix) {
         carbonDioxideState.value.float_value = co2Fix;
-        if (isPaired) {
+        if (notify) {
           homekit_characteristic_notify(&carbonDioxideState, carbonDioxideState.value);
         }
       }
@@ -158,14 +158,14 @@ void measureAQ(bool isPaired, bool lightSleep) {
       const auto vocFix = std::max<float>(0, std::min<float>(1000, voc)); // 0~1000
       if (vocDensityState.value.float_value != vocFix) {
         vocDensityState.value.float_value = vocFix;
-        if (isPaired) {
+        if (notify) {
           homekit_characteristic_notify(&vocDensityState, vocDensityState.value);
         }
       }
       const auto quality = toAirQuality(vocFix);
       if (airQualityState.value.uint8_value != quality) {
         airQualityState.value.uint8_value = quality;
-        if (isPaired) {
+        if (notify) {
           homekit_characteristic_notify(&airQualityState, airQualityState.value);
         }
       }
@@ -286,12 +286,15 @@ void setup(void) {
 
 void loop(void) {
   arduino_homekit_loop();
-  if (button != nullptr) { button->loop(); }
   // loop sensor
   const auto isPaired = arduino_homekit_get_running_server()->paired;
-  const auto lightSleep = victorWifi.isLightSleepMode() && isPaired;
-  if (ht != nullptr) { measureHT(isPaired, lightSleep); }
-  if (aq != nullptr) { measureAQ(isPaired, lightSleep); }
+  const auto connective = victorWifi.isLightSleepMode() && isPaired;
+  if (ht != nullptr) { measureHT(connective); }
+  if (aq != nullptr) { measureAQ(connective); }
   // sleep
-  appMain->loop(lightSleep);
+  appMain->loop(connective);
+  // button
+  if (button != nullptr) {
+    button->loop();
+  }
 }
