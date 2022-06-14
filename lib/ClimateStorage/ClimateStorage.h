@@ -23,8 +23,12 @@ namespace Victor::Components {
   };
 
   struct QueryConfig {
-    uint8_t loopSeconds = 0; // (0 ~ 256) How many seconds to read devices on i2c bus.
-    uint8_t resetHours = 0;  // (0 ~ 256) How many hours to soft reset devices on i2c bus.
+    // seconds to read devices on i2c bus
+    // 0=disabled
+    uint8_t loopSeconds = 0; // (0 ~ 256)
+    // hours to soft reset devices on i2c bus
+    // 0=disabled
+    uint8_t resetHours = 0;  // (0 ~ 256)
   };
 
   struct ReviseConfig {
@@ -35,9 +39,17 @@ namespace Victor::Components {
   };
 
   struct AQBaseline {
+    // load stored baseline on startup or not
     bool load = false;
+
+    // hours to store baseline
+    // 0=disabled
     uint8_t storeHours = 0; // (0 ~ 256)
+
+    // stored co2 baseline
     uint16_t co2 = 0; // (0 ~ 65535)
+
+    // stored voc baseline
     uint16_t voc = 0; // (0 ~ 65535)
   };
 
