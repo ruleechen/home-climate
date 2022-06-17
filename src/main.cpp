@@ -30,7 +30,7 @@ extern "C" homekit_characteristic_t accessoryName;
 extern "C" homekit_characteristic_t accessorySerialNumber;
 extern "C" homekit_server_config_t serverConfig;
 
-AppMain* appMain;
+AppMain* appMain = nullptr;
 DigitalInterruptButton* button = nullptr;
 
 ClimateSetting climate;
@@ -124,7 +124,7 @@ void measureHT(const bool notify) {
       .section(F("h"), String(humidity))
       .section(F("t"), String(temperature));
     // write to AQ
-    if (aq) {
+    if (aq != nullptr) {
       aq->setRelHumidity(humidity, temperature);
     }
   }
@@ -194,10 +194,10 @@ void setup(void) {
     states.push_back({ .text = F("Clients"),     .value = String(arduino_homekit_connected_clients_count()) });
     // buttons
     buttons.push_back({ .text = F("UnPair"),   .value = F("UnPair") }); // UnPair HomeKit
-    if (ht) {
+    if (ht != nullptr) {
       buttons.push_back({ .text = F("Reset HT"), .value = F("ht") });  // Reset Humidity/Temperature
     }
-    if (aq) {
+    if (aq != nullptr) {
       buttons.push_back({ .text = F("Reset AQ"), .value = F("aq") });  // Reset Air Quality
     }
   };

@@ -6,19 +6,19 @@
 namespace Victor::Components {
 
   enum MeasureState {
-    MEASURE_FAILED = 0,
+    MEASURE_FAILED  = 0,
     MEASURE_SUCCESS = 1,
     MEASURE_SKIPPED = 2,
   };
 
   enum HTSensorType {
-    HT_SENSOR_OFF = 0,
+    HT_SENSOR_OFF   = 0,
     HT_SENSOR_AHT10 = 1,
     HT_SENSOR_SHT30 = 2,
   };
 
   enum AQSensorType {
-    AQ_SENSOR_OFF = 0,
+    AQ_SENSOR_OFF   = 0,
     AQ_SENSOR_SGP30 = 1,
   };
 
@@ -32,7 +32,7 @@ namespace Victor::Components {
   };
 
   struct ReviseConfig {
-    float humidity = 0;
+    float humidity    = 0;
     float temperature = 0;
     float co2 = 0;
     float voc = 0;
@@ -58,10 +58,10 @@ namespace Victor::Components {
     uint8_t buttonTrueValue = 0; // (0 ~ 256) LOW
     HTSensorType htSensor = HT_SENSOR_AHT10;
     AQSensorType aqSensor = AQ_SENSOR_SGP30;
-    QueryConfig htQuery;
-    QueryConfig aqQuery;
-    ReviseConfig revise;
-    AQBaseline baseline;
+    QueryConfig htQuery = {};
+    QueryConfig aqQuery = {};
+    ReviseConfig revise = {};
+    AQBaseline baseline = {};
   };
 
   class ClimateStorage : public FileStorage<ClimateSetting> {
