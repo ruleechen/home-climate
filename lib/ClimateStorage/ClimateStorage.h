@@ -24,11 +24,11 @@ namespace Victor::Components {
 
   struct QueryConfig {
     // seconds to read devices on i2c bus
-    // 0=disabled
-    uint8_t loopSeconds = 0; // (0 ~ 256)
+    // 0 = disabled
+    uint8_t loopSeconds = 0; // (0~255)
     // hours to soft reset devices on i2c bus
-    // 0=disabled
-    uint8_t resetHours = 0;  // (0 ~ 256)
+    // 0 = disabled
+    uint8_t resetHours = 0;  // (0~255)
   };
 
   struct ReviseConfig {
@@ -43,19 +43,24 @@ namespace Victor::Components {
     bool load = false;
 
     // hours to store baseline
-    // 0=disabled
-    uint8_t storeHours = 0; // (0 ~ 256)
+    // 0 = disabled
+    uint8_t storeHours = 0; // (0~255)
 
     // stored co2 baseline
-    uint16_t co2 = 0; // (0 ~ 65535)
+    uint16_t co2 = 0; // (0~65535)
 
     // stored voc baseline
-    uint16_t voc = 0; // (0 ~ 65535)
+    uint16_t voc = 0; // (0~65535)
   };
 
   struct ClimateSetting {
-    int8_t buttonPin = -1; // (-127 ~ 128)
-    uint8_t buttonTrueValue = 0; // (0 ~ 256) LOW
+    // button input pin
+    // 0~127 = gpio
+    //    -1 = disabled
+    int8_t buttonPin = -1; // (-128~127)
+    // 0 = LOW
+    // 1 = HIGH
+    uint8_t buttonTrueValue = 0; // (0~255)
     HTSensorType htSensor = HT_SENSOR_AHT10;
     AQSensorType aqSensor = AQ_SENSOR_SGP30;
     QueryConfig htQuery = {};
