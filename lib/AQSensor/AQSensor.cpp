@@ -50,6 +50,7 @@ namespace Victor::Components {
       reset();
       return MEASURE_SKIPPED;
     }
+    ESP.wdtFeed();
     const auto readSuccess = _sgp30->measureAirQuality() == SGP30_SUCCESS;
     if (
       readSuccess &&

@@ -43,6 +43,7 @@ namespace Victor::Components {
       reset();
       return MEASURE_SKIPPED;
     }
+    ESP.wdtFeed();
     auto readSuccess = false;
     if (_aht10 != nullptr) {
       readSuccess = _aht10->readRawData() != AHT10_ERROR;
