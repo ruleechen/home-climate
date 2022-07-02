@@ -60,7 +60,7 @@ namespace Victor::Components {
       if (_sgp30->getBaseline() == SGP30_SUCCESS) {
         _storeInterval->start(now);
         auto setting = climateStorage.load();
-        setting.baseline.load = true; // once we have baseline generated, enable load for next boot
+        // setting.baseline.load = true; // once we have baseline generated, enable load for next boot
         setting.baseline.co2 = _sgp30->baselineCO2;
         setting.baseline.voc = _sgp30->baselineTVOC;
         climateStorage.save(setting);
