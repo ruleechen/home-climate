@@ -2,36 +2,36 @@
 
 namespace Victor::Components {
 
-  AQSensor::AQSensor(AQSensorType type, QueryConfig query) {
+  AQSensor::AQSensor(AQSensorType type, QueryConfig* query) {
     _sgp30 = new SGP30();
-    if (query.loopSeconds > 0) {
-      _measureInterval = new IntervalOverAuto(query.loopSeconds * 1000);
+    if (query->loopSeconds > 0) {
+      _measureInterval = new IntervalOverAuto(query->loopSeconds * 1000);
     }
-    if (query.resetHours > 0) {
-      _resetInterval = new IntervalOverAuto(query.resetHours * 60 * 60 * 1000);
+    if (query->resetHours > 0) {
+      _resetInterval = new IntervalOverAuto(query->resetHours * 60 * 60 * 1000);
     }
   }
 
-  bool AQSensor::begin(AQBaseline baseline) {
-    if (baseline.storeHours > 0) {
-      _storeInterval = new IntervalOver(baseline.storeHours * 60 * 60 * 1000);
+  bool AQSensor::begin(AQBaseline* baseline) {
+    if (baseline->storeHours > 0) {
+      _storeInterval = new IntervalOver(baseline->storeHours * 60 * 60 * 1000);
     }
     const auto found = _sgp30->begin();
     if (found) {
       _sgp30->initAirQuality();
       if (
-        baseline.load &&
-        baseline.co2 > 0 &&
-        baseline.voc > 0
+        baseline->load &&
+        baseline->co2 > 0 &&
+        baseline->voc > 0
       ) {
         _sgp30->setBaseline(
-          baseline.co2,
-          baseline.voc
+          baseline->co2,
+          baseline->voc
         );
         console.log()
           .bracket(F("load"))
-          .section(F("co2"), String(baseline.co2))
-          .section(F("voc"), String(baseline.voc));
+          .section(F("co2"), String(baseline->co2))
+          .section(F("voc"), String(baseline->voc));
       }
     }
     return found;
@@ -60,9 +60,9 @@ namespace Victor::Components {
       if (_sgp30->getBaseline() == SGP30_SUCCESS) {
         _storeInterval->start(now);
         auto setting = climateStorage.load();
-        // setting.baseline.load = true; // once we have baseline generated, enable load for next boot
-        setting.baseline.co2 = _sgp30->baselineCO2;
-        setting.baseline.voc = _sgp30->baselineTVOC;
+        setting->baseline->load = true; // once we have baseline generated, enable load for next boot
+        setting->baseline->co2 = _sgp30->baselineCO2;
+        setting->baseline->voc = _sgp30->baselineTVOC;
         climateStorage.save(setting);
         console.log()
           .bracket(F("store"))

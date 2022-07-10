@@ -10,8 +10,8 @@ namespace Victor::Components {
 
   class AQSensor {
    public:
-    AQSensor(AQSensorType type, QueryConfig query);
-    bool begin(AQBaseline baseline);
+    AQSensor(AQSensorType type, QueryConfig* query);
+    bool begin(AQBaseline* baseline);
     void reset();
     MeasureState measure();
     float getCO2();

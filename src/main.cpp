@@ -33,7 +33,7 @@ extern "C" homekit_server_config_t serverConfig;
 AppMain* appMain = nullptr;
 DigitalInterruptButton* button = nullptr;
 
-ClimateSetting climate;
+ClimateSetting* climate = nullptr;
 HTSensor* ht = nullptr;
 AQSensor* aq = nullptr;
 
@@ -99,7 +99,7 @@ void measureHT(const bool notify) {
   if (htOk) {
     auto temperature = ht->getTemperature();
     if (!isnanf(temperature)) {
-      temperature += climate.revise.temperature;
+      temperature += climate->revise->temperature;
       const auto temperatureFix = std::max<float>(0, std::min<float>(100, temperature)); // 0~100
       if (temperatureState.value.float_value != temperatureFix) {
         temperatureState.value.float_value = temperatureFix;
@@ -110,7 +110,7 @@ void measureHT(const bool notify) {
     }
     auto humidity = ht->getHumidity();
     if (!isnanf(humidity)) {
-      humidity += climate.revise.humidity;
+      humidity += climate->revise->humidity;
       const auto humidityFix = std::max<float>(0, std::min<float>(100, humidity)); // 0~100
       if (humidityState.value.float_value != humidityFix) {
         humidityState.value.float_value = humidityFix;
@@ -143,7 +143,7 @@ void measureAQ(const bool notify) {
   if (aqOk) {
     auto co2 = aq->getCO2();
     if (!isnan(co2)) {
-      co2 += climate.revise.co2;
+      co2 += climate->revise->co2;
       const auto co2Fix = std::max<float>(0, std::min<float>(100000, co2)); // 0~100000
       if (carbonDioxideState.value.float_value != co2Fix) {
         carbonDioxideState.value.float_value = co2Fix;
@@ -154,7 +154,7 @@ void measureAQ(const bool notify) {
     }
     auto voc = aq->getTVOC();
     if (!isnan(voc)) {
-      voc += climate.revise.voc;
+      voc += climate->revise->voc;
       const auto vocFix = std::max<float>(0, std::min<float>(1000, voc)); // 0~1000
       if (vocDensityState.value.float_value != vocFix) {
         vocDensityState.value.float_value = vocFix;
@@ -221,8 +221,8 @@ void setup(void) {
 
   // climate
   climate = climateStorage.load();
-  if (climate.buttonPin > -1) {
-    button = new DigitalInterruptButton(climate.buttonPin, climate.buttonTrueValue);
+  if (climate->buttonPin > -1) {
+    button = new DigitalInterruptButton(climate->buttonPin, climate->buttonTrueValue);
     button->onAction = [](const ButtonAction action) {
       console.log()
         .bracket(F("button"))
@@ -245,8 +245,8 @@ void setup(void) {
   // setup i2c
   const auto i2cStorage = new I2cStorage("/i2c.json");
   const auto i2c = i2cStorage->load();
-  if (i2c.enablePin > -1) {
-    const auto enableI2c = new DigitalOutput(i2c.enablePin, i2c.enableTrueValue);
+  if (i2c->enablePin > -1) {
+    const auto enableI2c = new DigitalOutput(i2c->enablePin, i2c->enableTrueValue);
     enableI2c->setValue(false);
     delay(200);
     enableI2c->setValue(true);
@@ -254,13 +254,13 @@ void setup(void) {
     delete enableI2c;
   }
   Wire.begin(   // https://zhuanlan.zhihu.com/p/137568249
-    i2c.sdaPin, // Inter-Integrated Circuit - Serial Data (I2C-SDA)
-    i2c.sclPin  // Inter-Integrated Circuit - Serial Clock (I2C-SCL)
+    i2c->sdaPin, // Inter-Integrated Circuit - Serial Data (I2C-SDA)
+    i2c->sclPin  // Inter-Integrated Circuit - Serial Clock (I2C-SCL)
   );
 
   // setup ht sensor
-  if (climate.htSensor != HT_SENSOR_OFF) {
-    ht = new HTSensor(climate.htSensor, climate.htQuery);
+  if (climate->htSensor != HT_SENSOR_OFF) {
+    ht = new HTSensor(climate->htSensor, climate->htQuery);
     if (!ht->begin()) {
       console.error()
         .bracket(F("ht"))
@@ -269,9 +269,9 @@ void setup(void) {
   }
 
   // setup aq sensor
-  if (climate.aqSensor != AQ_SENSOR_OFF) {
-    aq = new AQSensor(climate.aqSensor, climate.aqQuery);
-    if (!aq->begin(climate.baseline)) {
+  if (climate->aqSensor != AQ_SENSOR_OFF) {
+    aq = new AQSensor(climate->aqSensor, climate->aqQuery);
+    if (!aq->begin(climate->baseline)) {
       console.error()
         .bracket(F("aq"))
         .section(F("notfound"));

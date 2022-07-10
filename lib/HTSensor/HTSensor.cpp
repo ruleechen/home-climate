@@ -2,17 +2,17 @@
 
 namespace Victor::Components {
 
-  HTSensor::HTSensor(HTSensorType type, QueryConfig query) {
+  HTSensor::HTSensor(HTSensorType type, QueryConfig* query) {
     if (type == HT_SENSOR_AHT10) {
       _aht10 = new AHT10();
     } else if (type == HT_SENSOR_SHT30) {
       _sht30 = new SHT31();
     }
-    if (query.loopSeconds > 0) {
-      _measureInterval = new IntervalOverAuto(query.loopSeconds * 1000);
+    if (query->loopSeconds > 0) {
+      _measureInterval = new IntervalOverAuto(query->loopSeconds * 1000);
     }
-    if (query.resetHours > 0) {
-      _resetInterval = new IntervalOverAuto(query.resetHours * 60 * 60 * 1000);
+    if (query->resetHours > 0) {
+      _resetInterval = new IntervalOverAuto(query->resetHours * 60 * 60 * 1000);
     }
   }
 

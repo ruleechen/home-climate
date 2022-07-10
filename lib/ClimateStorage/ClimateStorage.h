@@ -63,10 +63,10 @@ namespace Victor::Components {
     uint8_t buttonTrueValue = 0; // (0~255)
     HTSensorType htSensor = HT_SENSOR_AHT10;
     AQSensorType aqSensor = AQ_SENSOR_SGP30;
-    QueryConfig htQuery = {};
-    QueryConfig aqQuery = {};
-    ReviseConfig revise = {};
-    AQBaseline baseline = {};
+    QueryConfig* htQuery = nullptr;
+    QueryConfig* aqQuery = nullptr;
+    ReviseConfig* revise = nullptr;
+    AQBaseline* baseline = nullptr;
   };
 
   class ClimateStorage : public FileStorage<ClimateSetting> {
@@ -74,8 +74,8 @@ namespace Victor::Components {
     ClimateStorage(const char* filePath = "/climate.json");
 
    protected:
-    void _serializeTo(const ClimateSetting& model, DynamicJsonDocument& doc) override;
-    void _deserializeFrom(ClimateSetting& model, const DynamicJsonDocument& doc) override;
+    void _serializeTo(const ClimateSetting* model, DynamicJsonDocument& doc) override;
+    void _deserializeFrom(ClimateSetting* model, const DynamicJsonDocument& doc) override;
   };
 
   // global

@@ -10,7 +10,7 @@ namespace Victor::Components {
 
   class HTSensor {
    public:
-    HTSensor(HTSensorType type, QueryConfig query);
+    HTSensor(HTSensorType type, QueryConfig* query);
     bool begin();
     void reset();
     MeasureState measure();
