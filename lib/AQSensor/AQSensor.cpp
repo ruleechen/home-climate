@@ -12,6 +12,25 @@ namespace Victor::Components {
     }
   }
 
+  AQSensor::~AQSensor() {
+    if (_measureInterval != nullptr) {
+      free(_measureInterval);
+      _measureInterval = nullptr;
+    }
+    if (_resetInterval != nullptr) {
+      free(_resetInterval);
+      _resetInterval = nullptr;
+    }
+    if (_storeInterval != nullptr) {
+      free(_storeInterval);
+      _storeInterval = nullptr;
+    }
+    if (_sgp30 != nullptr) {
+      delete _sgp30;
+      _sgp30 = nullptr;
+    }
+  }
+
   bool AQSensor::begin(AQBaseline* baseline) {
     if (baseline->storeHours > 0) {
       _storeInterval = new IntervalOver(baseline->storeHours * 60 * 60 * 1000);

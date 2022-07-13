@@ -16,6 +16,25 @@ namespace Victor::Components {
     }
   }
 
+  HTSensor::~HTSensor() {
+    if (_measureInterval != nullptr) {
+      free(_measureInterval);
+      _measureInterval = nullptr;
+    }
+    if (_resetInterval != nullptr) {
+      free(_resetInterval);
+      _resetInterval = nullptr;
+    }
+    if (_aht10 != nullptr) {
+      delete _aht10;
+      _aht10 = nullptr;
+    }
+    if (_sht30 != nullptr) {
+      delete _sht30;
+      _sht30 = nullptr;
+    }
+  }
+
   bool HTSensor::begin() {
     auto found = false;
     if (_aht10 != nullptr) {

@@ -11,6 +11,7 @@ namespace Victor::Components {
   class AQSensor {
    public:
     AQSensor(AQSensorType type, QueryConfig* query);
+    ~AQSensor();
     bool begin(AQBaseline* baseline);
     void reset();
     MeasureState measure();
