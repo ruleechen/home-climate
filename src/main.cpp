@@ -5,7 +5,7 @@
 #include <AppMain/AppMain.h>
 #include <GlobalHelpers.h>
 #include <I2cStorage/I2cStorage.h>
-#include <Button/DigitalInterruptButton.h>
+#include <Button/ActionButtonInterrupt.h>
 
 #include "ClimateStorage.h"
 #include "HTSensor.h"
@@ -31,7 +31,7 @@ extern "C" homekit_characteristic_t accessorySerialNumber;
 extern "C" homekit_server_config_t serverConfig;
 
 AppMain* appMain = nullptr;
-DigitalInterruptButton* button = nullptr;
+ActionButtonInterrupt* button = nullptr;
 
 ClimateSetting* climate = nullptr;
 HTSensor* ht = nullptr;
@@ -222,7 +222,7 @@ void setup(void) {
   // climate
   climate = climateStorage.load();
   if (climate->buttonPin > -1) {
-    button = new DigitalInterruptButton(climate->buttonPin, climate->buttonTrueValue);
+    button = new ActionButtonInterrupt(climate->buttonPin, climate->buttonTrueValue);
     button->onAction = [](const ButtonAction action) {
       console.log()
         .bracket(F("button"))
@@ -233,9 +233,9 @@ void setup(void) {
         builtinLed.flash(500);
         const auto enable = victorWifi.isLightSleepMode();
         victorWifi.enableAP(enable); // toggle enabling ap
-      } else if (action == BUTTON_ACTION_RESTART) {
+      } else if (action == BUTTON_ACTION_PRESSED_HOLD_L1) {
         ESP.restart();
-      } else if (action == BUTTON_ACTION_RESTORE) {
+      } else if (action == BUTTON_ACTION_PRESSED_HOLD_L2) {
         homekit_server_reset();
         ESP.restart();
       }
