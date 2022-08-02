@@ -1,7 +1,7 @@
 #ifndef AQSensor_h
 #define AQSensor_h
 
-#include <SparkFun_SGP30_Arduino_Library.h>
+#include <Adafruit_SGP30.h>
 #include <Timer/IntervalOverAuto.h>
 #include <Timer/IntervalOver.h>
 #include "ClimateStorage.h"
@@ -25,7 +25,7 @@ namespace Victor::Components {
     IntervalOverAuto* _measureInterval = nullptr;
     IntervalOverAuto* _resetInterval = nullptr;
     IntervalOver* _storeInterval = nullptr;
-    SGP30* _sgp30 = nullptr;
+    Adafruit_SGP30* _sgp30 = nullptr;
   };
 
 } // namespace Victor::Components
